@@ -1,0 +1,25 @@
+{
+  "name": "bitcoin-nanopayment",
+  "version": "0.1.0",
+  "description": "Send probabilistic Bitcoin nanopayments",
+  "keywords": ["bitcoin", "btc", "micropayment", "nanopayment"],
+  "author": {
+	"name": "Paul Kernfeld",
+	"email": "paulkernfeld@gmail.com",
+    "url": "http://www.paulkernfeld.com"
+  },
+  "files": ["lib"],
+  "main": "lib/payment-btc",
+  "repository": { "type": "git", "url": "" },
+  "dependencies": {
+    "async": "latest",
+    "bitcoin": "latest",
+    "buffertools": "latest",
+	"colors": "latest"
+  },
+  "devDependencies": {
+	"docco": "latest"
+  },
+  "license": "GPL v3",
+  "engines": { "node": ">= 0.10.9" }
+}

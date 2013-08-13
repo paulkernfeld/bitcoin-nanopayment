@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>util.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="base58.html">
+                base58.js
+              </a>
+            
+              
+              <a class="source" href="bitcoin-nanopayment.html">
+                bitcoin-nanopayment.js
+              </a>
+            
+              
+              <a class="source" href="demo.html">
+                demo.js
+              </a>
+            
+              
+              <a class="source" href="jsbn-patched.html">
+                jsbn-patched.js
+              </a>
+            
+              
+              <a class="source" href="script.html">
+                script.js
+              </a>
+            
+              
+              <a class="source" href="test-base58.html">
+                test-base58.js
+              </a>
+            
+              
+              <a class="source" href="test-jsbn.html">
+                test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment.html">
+                test-payment.js
+              </a>
+            
+              
+              <a class="source" href="test-random.html">
+                test-random.js
+              </a>
+            
+              
+              <a class="source" href="util.html">
+                util.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>util.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Copyright 2013 Paul Kernfeld</p>
+<p>This file is part of bitcoin-nanopayment.</p>
+<p> bitcoin-nanopayment is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.</p>
+<p> bitcoin-nanopayment is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.</p>
+<p> You should have received a copy of the GNU General Public License
+ along with bitcoin-nanopayment.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Internal imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>External imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);
+<span class="keyword">var</span> crypto = require(<span class="string">'crypto'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>This file is just miscellaneous helper functions</p>
+<p>Generates a random number between 0 and n - 1, inclusive.</p>
+<p>TODO: use all the bits, keep leftover unused bits</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="keyword">function</span>(n) {
+  assert(n &gt; <span class="number">0</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>How many random bytes do we need?
+We need:   8 ^ nBytes &gt;= n</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">for</span>(<span class="keyword">var</span> nBytes = <span class="number">0</span>; Math.pow(<span class="number">8</span>, nBytes) &lt; n; nBytes++);
+
+  <span class="keyword">var</span> random;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Use rejection sampling</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">do</span> {
+    <span class="keyword">var</span> randomBi = <span class="keyword">new</span> BigInteger();
+    randomBi.fromString(crypto.randomBytes(nBytes).toString(<span class="string">'hex'</span>), <span class="number">16</span>);
+    random = parseInt(randomBi.toString(<span class="number">10</span>))
+  } <span class="keyword">while</span> (random &gt;= n);
+
+  <span class="keyword">return</span> random;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Verify that this variable is an integer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="keyword">function</span>(n) {
+   <span class="keyword">return</span> <span class="keyword">typeof</span> n === <span class="string">'number'</span> &amp;&amp; n % <span class="number">1</span> == <span class="number">0</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Verify that this variable is a Bitcoin address</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="keyword">function</span>(a) {
+  <span class="keyword">return</span> <span class="keyword">typeof</span> a === <span class="string">'string'</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Verify that this variable is a Bitcoin private key</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="keyword">function</span>(pk) {
+  <span class="keyword">return</span> <span class="keyword">typeof</span> pk === <span class="string">'string'</span>;
+};</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

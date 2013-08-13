@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>test-base58.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="base58.html">
+                base58.js
+              </a>
+            
+              
+              <a class="source" href="bitcoin-nanopayment.html">
+                bitcoin-nanopayment.js
+              </a>
+            
+              
+              <a class="source" href="demo.html">
+                demo.js
+              </a>
+            
+              
+              <a class="source" href="jsbn-patched.html">
+                jsbn-patched.js
+              </a>
+            
+              
+              <a class="source" href="script.html">
+                script.js
+              </a>
+            
+              
+              <a class="source" href="test-base58.html">
+                test-base58.js
+              </a>
+            
+              
+              <a class="source" href="test-jsbn.html">
+                test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment.html">
+                test-payment.js
+              </a>
+            
+              
+              <a class="source" href="test-random.html">
+                test-random.js
+              </a>
+            
+              
+              <a class="source" href="util.html">
+                util.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>test-base58.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Copyright 2013 Paul Kernfeld</p>
+<p>This file is part of bitcoin-nanopayment.</p>
+<p> bitcoin-nanopayment is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.</p>
+<p> bitcoin-nanopayment is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.</p>
+<p> You should have received a copy of the GNU General Public License
+ along with bitcoin-nanopayment.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Internal imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> base58 = require(<span class="string">'./base58'</span>);
+<span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>External imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Test Base 58 encoding and decoding functionality</p>
+<p>Make sure the encode and decode are inverses</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>{
+  <span class="keyword">var</span> start = [<span class="number">0x00</span>, <span class="number">0x77</span>, <span class="number">0x88</span>];
+  <span class="keyword">var</span> encoded = base58.encode(start);
+  console.log(encoded);
+  <span class="keyword">var</span> decoded = base58.decode(encoded);
+  console.log(decoded);
+  assert(<span class="keyword">new</span> Buffer(start).equals(<span class="keyword">new</span> Buffer(decoded)));
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Test example from:
+<a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses">https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>{
+  <span class="keyword">var</span> checked = <span class="string">'16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM'</span>;
+  <span class="keyword">var</span> decoded = base58.decodeChecked(checked);
+  assert.equal(decoded.version, <span class="number">0</span>);
+  assert.equal(
+    decoded.payload.toString(<span class="string">'hex'</span>),
+    <span class="string">'010966776006953d5567439e5e39f86a0d273bee'</span>
+  );
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

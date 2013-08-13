@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>jsbn-patched.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="base58.html">
+                base58.js
+              </a>
+            
+              
+              <a class="source" href="bitcoin-nanopayment.html">
+                bitcoin-nanopayment.js
+              </a>
+            
+              
+              <a class="source" href="demo.html">
+                demo.js
+              </a>
+            
+              
+              <a class="source" href="jsbn-patched.html">
+                jsbn-patched.js
+              </a>
+            
+              
+              <a class="source" href="script.html">
+                script.js
+              </a>
+            
+              
+              <a class="source" href="test-base58.html">
+                test-base58.js
+              </a>
+            
+              
+              <a class="source" href="test-jsbn.html">
+                test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment.html">
+                test-payment.js
+              </a>
+            
+              
+              <a class="source" href="test-random.html">
+                test-random.js
+              </a>
+            
+              
+              <a class="source" href="util.html">
+                util.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>jsbn-patched.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Copyright (c) 2005  Tom Wu
+All Rights Reserved.
+See &quot;doc/jsbn-license.txt&quot; for details.</p>
+<p>Basic JavaScript BN library - subset useful for RSA encryption.</p>
+<p>This is a slight modification of Tom Wu&#39;s jsbn library, mostly because I
+couldn&#39;t figure out how to import the original version of the library.</p>
+<p>PK shitpatch</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> navigator = <span class="literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Bits per digit</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> dbits;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>JavaScript engine analysis</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> canary = <span class="number">0xdeadbeefcafe</span>;
+<span class="keyword">var</span> j_lm = ((canary&amp;<span class="number">0xffffff</span>)==<span class="number">0xefcafe</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>(public) Constructor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger = <span class="function"><span class="keyword">function</span> <span class="params">(a,b,c)</span> {</span>
+  <span class="keyword">if</span>(a != <span class="literal">null</span>)
+    <span class="keyword">if</span>(<span class="string">"number"</span> == <span class="keyword">typeof</span> a) <span class="keyword">this</span>.fromNumber(a,b,c);
+    <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="literal">null</span> &amp;&amp; <span class="string">"string"</span> != <span class="keyword">typeof</span> a) <span class="keyword">this</span>.fromString(a,<span class="number">256</span>);
+    <span class="keyword">else</span> <span class="keyword">this</span>.fromString(a,b);
+}
+<span class="keyword">var</span> BigInteger = exports.BigInteger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>return new, unset BigInteger</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">nbi</span><span class="params">()</span> {</span> <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(<span class="literal">null</span>); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>am: Compute w_j += (x<em>this_i), propagate carries,
+c is initial carry, returns final carry.
+c &lt; 3</em>dvalue, x &lt; 2*dvalue, this_i &lt; dvalue
+We need to select the fastest one that works in this environment.</p>
+<p>am1: use a single mult and divide to get the high bits,
+max digit bits should be 26 because
+max internal value = 2<em>dvalue^2-2</em>dvalue (&lt; 2^53)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">am1</span><span class="params">(i,x,w,j,c,n)</span> {</span>
+  <span class="keyword">while</span>(--n &gt;= <span class="number">0</span>) {
+    <span class="keyword">var</span> v = x*<span class="keyword">this</span>[i++]+w[j]+c;
+    c = Math.floor(v/<span class="number">0x4000000</span>);
+    w[j++] = v&amp;<span class="number">0x3ffffff</span>;
+  }
+  <span class="keyword">return</span> c;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>am2 avoids a big mult-and-extract completely.
+Max digit bits should be &lt;= 30 because we do bitwise ops
+on values up to 2*hdvalue^2-hdvalue-1 (&lt; 2^31)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">am2</span><span class="params">(i,x,w,j,c,n)</span> {</span>
+  <span class="keyword">var</span> xl = x&amp;<span class="number">0x7fff</span>, xh = x&gt;&gt;<span class="number">15</span>;
+  <span class="keyword">while</span>(--n &gt;= <span class="number">0</span>) {
+    <span class="keyword">var</span> l = <span class="keyword">this</span>[i]&amp;<span class="number">0x7fff</span>;
+    <span class="keyword">var</span> h = <span class="keyword">this</span>[i++]&gt;&gt;<span class="number">15</span>;
+    <span class="keyword">var</span> m = xh*l+h*xl;
+    l = xl*l+((m&amp;<span class="number">0x7fff</span>)&lt;<span class="xml"><span class="tag">&lt;<span class="title">15)+w[j]+(c&amp;0x3fffffff);
+</span>    <span class="attribute">c</span> = (<span class="attribute">l</span>&gt;</span>&gt;&gt;30)+(m&gt;&gt;&gt;15)+xh*h+(c&gt;&gt;&gt;30);
+    w[j++] = l&amp;0x3fffffff;
+  }
+  return c;
+}
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Alternately, set max digit bits to 28 since some
+browsers slow down when dealing with 32-bit numbers.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">am3</span><span class="params">(i,x,w,j,c,n)</span> {</span>
+  <span class="keyword">var</span> xl = x&amp;<span class="number">0x3fff</span>, xh = x&gt;&gt;<span class="number">14</span>;
+  <span class="keyword">while</span>(--n &gt;= <span class="number">0</span>) {
+    <span class="keyword">var</span> l = <span class="keyword">this</span>[i]&amp;<span class="number">0x3fff</span>;
+    <span class="keyword">var</span> h = <span class="keyword">this</span>[i++]&gt;&gt;<span class="number">14</span>;
+    <span class="keyword">var</span> m = xh*l+h*xl;
+    l = xl*l+((m&amp;<span class="number">0x3fff</span>)&lt;<span class="xml"><span class="tag">&lt;<span class="title">14)+w[j]+c;
+</span>    <span class="attribute">c</span> = (<span class="attribute">l</span>&gt;</span>&gt;28)+(m&gt;&gt;14)+xh*h;
+    w[j++] = l&amp;0xfffffff;
+  }
+  return c;
+}
+if(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName == "Microsoft Internet Explorer"))) {
+  exports.BigInteger.prototype.am = am2;
+  dbits = 30;
+}
+else if(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName != "Netscape"))) {
+  exports.BigInteger.prototype.am = am1;
+  dbits = 26;
+}
+else { // Mozilla/Netscape seems to prefer am3
+  exports.BigInteger.prototype.am = am3;
+  dbits = 28;
+}
+
+exports.BigInteger.prototype.DB = dbits;
+exports.BigInteger.prototype.DM = ((1<span class="tag">&lt;<span class="title">&lt;dbits)-1);
+exports.BigInteger.prototype.DV</span> = (<span class="attribute">1</span>&lt;&lt;<span class="attribute">dbits</span>);
+
+<span class="attribute">var</span> <span class="attribute">BI_FP</span> = <span class="attribute">52</span>;
+<span class="attribute">exports.BigInteger.prototype.FV</span> = <span class="attribute">Math.pow</span>(<span class="attribute">2</span>,<span class="attribute">BI_FP</span>);
+<span class="attribute">exports.BigInteger.prototype.F1</span> = <span class="attribute">BI_FP-dbits</span>;
+<span class="attribute">exports.BigInteger.prototype.F2</span> = <span class="attribute">2</span>*<span class="attribute">dbits-BI_FP</span>;
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Digit conversions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> BI_RM = <span class="string">"0123456789abcdefghijklmnopqrstuvwxyz"</span>;
+<span class="keyword">var</span> BI_RC = <span class="keyword">new</span> Array();
+<span class="keyword">var</span> rr,vv;
+rr = <span class="string">"0"</span>.charCodeAt(<span class="number">0</span>);
+<span class="keyword">for</span>(vv = <span class="number">0</span>; vv &lt;= <span class="number">9</span>; ++vv) BI_RC[rr++] = vv;
+rr = <span class="string">"a"</span>.charCodeAt(<span class="number">0</span>);
+<span class="keyword">for</span>(vv = <span class="number">10</span>; vv &lt; <span class="number">36</span>; ++vv) BI_RC[rr++] = vv;
+rr = <span class="string">"A"</span>.charCodeAt(<span class="number">0</span>);
+<span class="keyword">for</span>(vv = <span class="number">10</span>; vv &lt; <span class="number">36</span>; ++vv) BI_RC[rr++] = vv;
+
+<span class="function"><span class="keyword">function</span> <span class="title">int2char</span><span class="params">(n)</span> {</span> <span class="keyword">return</span> BI_RM.charAt(n); }
+<span class="function"><span class="keyword">function</span> <span class="title">intAt</span><span class="params">(s,i)</span> {</span>
+  <span class="keyword">var</span> c = BI_RC[s.charCodeAt(i)];
+  <span class="keyword">return</span> (c==<span class="literal">null</span>)?-<span class="number">1</span>:c;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>(protected) copy this to r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpCopyTo</span><span class="params">(r)</span> {</span>
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="keyword">this</span>.t-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) r[i] = <span class="keyword">this</span>[i];
+  r.t = <span class="keyword">this</span>.t;
+  r.s = <span class="keyword">this</span>.s;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>(protected) set from integer value x, -DV &lt;= x &lt; DV</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpFromInt</span><span class="params">(x)</span> {</span>
+  <span class="keyword">this</span>.t = <span class="number">1</span>;
+  <span class="keyword">this</span>.s = (x&lt;<span class="number">0</span>)?-<span class="number">1</span>:<span class="number">0</span>;
+  <span class="keyword">if</span>(x &gt; <span class="number">0</span>) <span class="keyword">this</span>[<span class="number">0</span>] = x;
+  <span class="keyword">else</span> <span class="keyword">if</span>(x &lt; -<span class="number">1</span>) <span class="keyword">this</span>[<span class="number">0</span>] = x+<span class="keyword">this</span>.DV;
+  <span class="keyword">else</span> <span class="keyword">this</span>.t = <span class="number">0</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>return bigint initialized to value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">nbv</span><span class="params">(i)</span> {</span> <span class="keyword">var</span> r = nbi(); r.fromInt(i); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>(protected) set from string and radix</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpFromString</span><span class="params">(s,b)</span> {</span>
+  <span class="keyword">var</span> k;
+  <span class="keyword">if</span>(b == <span class="number">16</span>) k = <span class="number">4</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">8</span>) k = <span class="number">3</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">256</span>) k = <span class="number">8</span>; <span class="comment">// byte array</span>
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">2</span>) k = <span class="number">1</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">32</span>) k = <span class="number">5</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">4</span>) k = <span class="number">2</span>;
+  <span class="keyword">else</span> { <span class="keyword">this</span>.fromRadix(s,b); <span class="keyword">return</span>; }
+  <span class="keyword">this</span>.t = <span class="number">0</span>;
+  <span class="keyword">this</span>.s = <span class="number">0</span>;
+  <span class="keyword">var</span> i = s.length, mi = <span class="literal">false</span>, sh = <span class="number">0</span>;
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) {
+    <span class="keyword">var</span> x = (k==<span class="number">8</span>)?s[i]&amp;<span class="number">0xff</span>:intAt(s,i);
+    <span class="keyword">if</span>(x &lt; <span class="number">0</span>) {
+      <span class="keyword">if</span>(s.charAt(i) == <span class="string">"-"</span>) mi = <span class="literal">true</span>;
+      <span class="keyword">continue</span>;
+    }
+    mi = <span class="literal">false</span>;
+    <span class="keyword">if</span>(sh == <span class="number">0</span>)
+      <span class="keyword">this</span>[<span class="keyword">this</span>.t++] = x;
+    <span class="keyword">else</span> <span class="keyword">if</span>(sh+k &gt; <span class="keyword">this</span>.DB) {
+      <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] |= (x&amp;((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(this.DB-sh))-1))&lt;&lt;sh;
+</span>      <span class="attribute">this</span>[<span class="attribute">this.t</span>++] = (<span class="attribute">x</span>&gt;</span>&gt;(this.DB-sh));
+    }
+    else
+      this[this.t-1] |= x<span class="tag">&lt;<span class="title">&lt;sh;
+</span>    <span class="attribute">sh</span> += <span class="attribute">k</span>;
+    <span class="attribute">if</span>(<span class="attribute">sh</span> &gt;</span>= this.DB) sh -= this.DB;
+  }
+  if(k == 8 &amp;&amp; (s[0]&amp;0x80) != 0) {
+    this.s = -1;
+    if(sh &gt; 0) this[this.t-1] |= ((1<span class="tag">&lt;<span class="title">&lt;(this.DB-sh))-1)&lt;&lt;sh;
+</span>  }
+  <span class="attribute">this.clamp</span>();
+  <span class="attribute">if</span>(<span class="attribute">mi</span>) <span class="attribute">exports.BigInteger.ZERO.subTo</span>(<span class="attribute">this</span>,<span class="attribute">this</span>);
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>(protected) clamp off excess high words</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpClamp</span><span class="params">()</span> {</span>
+  <span class="keyword">var</span> c = <span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM;
+  <span class="keyword">while</span>(<span class="keyword">this</span>.t &gt; <span class="number">0</span> &amp;&amp; <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] == c) --<span class="keyword">this</span>.t;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>(public) return string representation in given radix</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnToString</span><span class="params">(b)</span> {</span>
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="string">"-"</span>+<span class="keyword">this</span>.negate().toString(b);
+  <span class="keyword">var</span> k;
+  <span class="keyword">if</span>(b == <span class="number">16</span>) k = <span class="number">4</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">8</span>) k = <span class="number">3</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">2</span>) k = <span class="number">1</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">32</span>) k = <span class="number">5</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">4</span>) k = <span class="number">2</span>;
+  <span class="keyword">else</span> <span class="keyword">return</span> <span class="keyword">this</span>.toRadix(b);
+  <span class="keyword">var</span> km = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">k)-1,</span> <span class="attribute">d</span>, <span class="attribute">m</span> = <span class="attribute">false</span>, <span class="attribute">r</span> = "", <span class="attribute">i</span> = <span class="attribute">this.t</span>;
+  <span class="attribute">var</span> <span class="attribute">p</span> = <span class="attribute">this.DB-</span>(<span class="attribute">i</span>*<span class="attribute">this.DB</span>)%<span class="attribute">k</span>;
+  <span class="attribute">if</span>(<span class="attribute">i--</span> &gt;</span> 0) {
+    if(p <span class="tag">&lt; <span class="attribute">this.DB</span> &amp;&amp; (<span class="attribute">d</span> = <span class="attribute">this</span>[<span class="attribute">i</span>]&gt;</span>&gt;p) &gt; 0) { m = true; r = int2char(d); }
+    while(i &gt;= 0) {
+      if(p <span class="tag">&lt; <span class="attribute">k</span>) {
+        <span class="attribute">d</span> = (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;((<span class="attribute">1</span>&lt;&lt;<span class="attribute">p</span>)<span class="attribute">-1</span>))&lt;&lt;(<span class="attribute">k-p</span>);
+        <span class="attribute">d</span> |= <span class="attribute">this</span>[<span class="attribute">--i</span>]&gt;</span>&gt;(p+=this.DB-k);
+      }
+      else {
+        d = (this[i]&gt;&gt;(p-=k))&amp;km;
+        if(p <span class="tag">&lt;<span class="title">=</span> <span class="attribute">0</span>) { <span class="attribute">p</span> += <span class="attribute">this.DB</span>; <span class="attribute">--i</span>; }
+      }
+      <span class="attribute">if</span>(<span class="attribute">d</span> &gt;</span> 0) m = true;
+      if(m) r += int2char(d);
+    }
+  }
+  return m?r:"0";
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>(public) -this</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnNegate</span><span class="params">()</span> {</span> <span class="keyword">var</span> r = nbi(); exports.BigInteger.ZERO.subTo(<span class="keyword">this</span>,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>(public) |this|</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnAbs</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.s&lt;<span class="number">0</span>)?<span class="keyword">this</span>.negate():<span class="keyword">this</span>; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>(public) return + if this &gt; a, - if this &lt; a, 0 if equal</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnCompareTo</span><span class="params">(a)</span> {</span>
+  <span class="keyword">var</span> r = <span class="keyword">this</span>.s-a.s;
+  <span class="keyword">if</span>(r != <span class="number">0</span>) <span class="keyword">return</span> r;
+  <span class="keyword">var</span> i = <span class="keyword">this</span>.t;
+  r = i-a.t;
+  <span class="keyword">if</span>(r != <span class="number">0</span>) <span class="keyword">return</span> (<span class="keyword">this</span>.s&lt;<span class="number">0</span>)?-r:r;
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) <span class="keyword">if</span>((r=<span class="keyword">this</span>[i]-a[i]) != <span class="number">0</span>) <span class="keyword">return</span> r;
+  <span class="keyword">return</span> <span class="number">0</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>returns bit length of the integer x</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">nbits</span><span class="params">(x)</span> {</span>
+  <span class="keyword">var</span> r = <span class="number">1</span>, t;
+  <span class="keyword">if</span>((t=x&gt;&gt;&gt;<span class="number">16</span>) != <span class="number">0</span>) { x = t; r += <span class="number">16</span>; }
+  <span class="keyword">if</span>((t=x&gt;&gt;<span class="number">8</span>) != <span class="number">0</span>) { x = t; r += <span class="number">8</span>; }
+  <span class="keyword">if</span>((t=x&gt;&gt;<span class="number">4</span>) != <span class="number">0</span>) { x = t; r += <span class="number">4</span>; }
+  <span class="keyword">if</span>((t=x&gt;&gt;<span class="number">2</span>) != <span class="number">0</span>) { x = t; r += <span class="number">2</span>; }
+  <span class="keyword">if</span>((t=x&gt;&gt;<span class="number">1</span>) != <span class="number">0</span>) { x = t; r += <span class="number">1</span>; }
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>(public) return the number of bits in &quot;this&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnBitLength</span><span class="params">()</span> {</span>
+  <span class="keyword">if</span>(<span class="keyword">this</span>.t &lt;= <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;
+  <span class="keyword">return</span> <span class="keyword">this</span>.DB*(<span class="keyword">this</span>.t-<span class="number">1</span>)+nbits(<span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>]^(<span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM));
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>(protected) r = this &lt;&lt; n*DB</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpDLShiftTo</span><span class="params">(n,r)</span> {</span>
+  <span class="keyword">var</span> i;
+  <span class="keyword">for</span>(i = <span class="keyword">this</span>.t-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) r[i+n] = <span class="keyword">this</span>[i];
+  <span class="keyword">for</span>(i = n-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) r[i] = <span class="number">0</span>;
+  r.t = <span class="keyword">this</span>.t+n;
+  r.s = <span class="keyword">this</span>.s;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>(protected) r = this &gt;&gt; n*DB</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpDRShiftTo</span><span class="params">(n,r)</span> {</span>
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = n; i &lt; <span class="keyword">this</span>.t; ++i) r[i-n] = <span class="keyword">this</span>[i];
+  r.t = Math.max(<span class="keyword">this</span>.t-n,<span class="number">0</span>);
+  r.s = <span class="keyword">this</span>.s;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>(protected) r = this &lt;&lt; n</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpLShiftTo</span><span class="params">(n,r)</span> {</span>
+  <span class="keyword">var</span> bs = n%<span class="keyword">this</span>.DB;
+  <span class="keyword">var</span> cbs = <span class="keyword">this</span>.DB-bs;
+  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">cbs)-1;
+</span>  <span class="attribute">var</span> <span class="attribute">ds</span> = <span class="attribute">Math.floor</span>(<span class="attribute">n</span>/<span class="attribute">this.DB</span>), <span class="attribute">c</span> = (<span class="attribute">this.s</span>&lt;&lt;<span class="attribute">bs</span>)&amp;<span class="attribute">this.DM</span>, <span class="attribute">i</span>;
+  <span class="attribute">for</span>(<span class="attribute">i</span> = <span class="attribute">this.t-1</span>; <span class="attribute">i</span> &gt;</span>= 0; --i) {
+    r[i+ds+1] = (this[i]&gt;&gt;cbs)|c;
+    c = (this[i]&amp;bm)<span class="tag">&lt;<span class="title">&lt;bs;
+</span>  }
+  <span class="attribute">for</span>(<span class="attribute">i</span> = <span class="attribute">ds-1</span>; <span class="attribute">i</span> &gt;</span>= 0; --i) r[i] = 0;
+  r[ds] = c;
+  r.t = this.t+ds+1;
+  r.s = this.s;
+  r.clamp();
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>(protected) r = this &gt;&gt; n</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpRShiftTo</span><span class="params">(n,r)</span> {</span>
+  r.s = <span class="keyword">this</span>.s;
+  <span class="keyword">var</span> ds = Math.floor(n/<span class="keyword">this</span>.DB);
+  <span class="keyword">if</span>(ds &gt;= <span class="keyword">this</span>.t) { r.t = <span class="number">0</span>; <span class="keyword">return</span>; }
+  <span class="keyword">var</span> bs = n%<span class="keyword">this</span>.DB;
+  <span class="keyword">var</span> cbs = <span class="keyword">this</span>.DB-bs;
+  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">bs)-1;
+</span>  <span class="attribute">r</span>[<span class="attribute">0</span>] = <span class="attribute">this</span>[<span class="attribute">ds</span>]&gt;</span>&gt;bs;
+  for(var i = ds+1; i <span class="tag">&lt; <span class="attribute">this.t</span>; ++<span class="attribute">i</span>) {
+    <span class="attribute">r</span>[<span class="attribute">i-ds-1</span>] |= (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;<span class="attribute">bm</span>)&lt;&lt;<span class="attribute">cbs</span>;
+    <span class="attribute">r</span>[<span class="attribute">i-ds</span>] = <span class="attribute">this</span>[<span class="attribute">i</span>]&gt;</span>&gt;bs;
+  }
+  if(bs &gt; 0) r[this.t-ds-1] |= (this.s&amp;bm)<span class="tag">&lt;<span class="title">&lt;cbs;
+</span>  <span class="attribute">r.t</span> = <span class="attribute">this.t-ds</span>;
+  <span class="attribute">r.clamp</span>();
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>(protected) r = this - a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpSubTo</span><span class="params">(a,r)</span> {</span>
+  <span class="keyword">var</span> i = <span class="number">0</span>, c = <span class="number">0</span>, m = Math.min(a.t,<span class="keyword">this</span>.t);
+  <span class="keyword">while</span>(i &lt; m) {
+    c += <span class="keyword">this</span>[i]-a[i];
+    r[i++] = c&amp;<span class="keyword">this</span>.DM;
+    c &gt;&gt;= <span class="keyword">this</span>.DB;
+  }
+  <span class="keyword">if</span>(a.t &lt; <span class="keyword">this</span>.t) {
+    c -= a.s;
+    <span class="keyword">while</span>(i &lt; <span class="keyword">this</span>.t) {
+      c += <span class="keyword">this</span>[i];
+      r[i++] = c&amp;<span class="keyword">this</span>.DM;
+      c &gt;&gt;= <span class="keyword">this</span>.DB;
+    }
+    c += <span class="keyword">this</span>.s;
+  }
+  <span class="keyword">else</span> {
+    c += <span class="keyword">this</span>.s;
+    <span class="keyword">while</span>(i &lt; a.t) {
+      c -= a[i];
+      r[i++] = c&amp;<span class="keyword">this</span>.DM;
+      c &gt;&gt;= <span class="keyword">this</span>.DB;
+    }
+    c -= a.s;
+  }
+  r.s = (c&lt;<span class="number">0</span>)?-<span class="number">1</span>:<span class="number">0</span>;
+  <span class="keyword">if</span>(c &lt; -<span class="number">1</span>) r[i++] = <span class="keyword">this</span>.DV+c;
+  <span class="keyword">else</span> <span class="keyword">if</span>(c &gt; <span class="number">0</span>) r[i++] = c;
+  r.t = i;
+  r.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>(protected) r = this * a, r != this,a (HAC 14.12)
+&quot;this&quot; should be the larger one if appropriate.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpMultiplyTo</span><span class="params">(a,r)</span> {</span>
+  <span class="keyword">var</span> x = <span class="keyword">this</span>.abs(), y = a.abs();
+  <span class="keyword">var</span> i = x.t;
+  r.t = i+y.t;
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) r[i] = <span class="number">0</span>;
+  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; y.t; ++i) r[i+x.t] = x.am(<span class="number">0</span>,y[i],r,i,<span class="number">0</span>,x.t);
+  r.s = <span class="number">0</span>;
+  r.clamp();
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s != a.s) exports.BigInteger.ZERO.subTo(r,r);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>(protected) r = this^2, r != this (HAC 14.16)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpSquareTo</span><span class="params">(r)</span> {</span>
+  <span class="keyword">var</span> x = <span class="keyword">this</span>.abs();
+  <span class="keyword">var</span> i = r.t = <span class="number">2</span>*x.t;
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) r[i] = <span class="number">0</span>;
+  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; x.t-<span class="number">1</span>; ++i) {
+    <span class="keyword">var</span> c = x.am(i,x[i],r,<span class="number">2</span>*i,<span class="number">0</span>,<span class="number">1</span>);
+    <span class="keyword">if</span>((r[i+x.t]+=x.am(i+<span class="number">1</span>,<span class="number">2</span>*x[i],r,<span class="number">2</span>*i+<span class="number">1</span>,c,x.t-i-<span class="number">1</span>)) &gt;= x.DV) {
+      r[i+x.t] -= x.DV;
+      r[i+x.t+<span class="number">1</span>] = <span class="number">1</span>;
+    }
+  }
+  <span class="keyword">if</span>(r.t &gt; <span class="number">0</span>) r[r.t-<span class="number">1</span>] += x.am(i,x[i],r,<span class="number">2</span>*i,<span class="number">0</span>,<span class="number">1</span>);
+  r.s = <span class="number">0</span>;
+  r.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>(protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
+r != q, this != m.  q or r may be null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpDivRemTo</span><span class="params">(m,q,r)</span> {</span>
+  <span class="keyword">var</span> pm = m.abs();
+  <span class="keyword">if</span>(pm.t &lt;= <span class="number">0</span>) <span class="keyword">return</span>;
+  <span class="keyword">var</span> pt = <span class="keyword">this</span>.abs();
+  <span class="keyword">if</span>(pt.t &lt; pm.t) {
+    <span class="keyword">if</span>(q != <span class="literal">null</span>) q.fromInt(<span class="number">0</span>);
+    <span class="keyword">if</span>(r != <span class="literal">null</span>) <span class="keyword">this</span>.copyTo(r);
+    <span class="keyword">return</span>;
+  }
+  <span class="keyword">if</span>(r == <span class="literal">null</span>) r = nbi();
+  <span class="keyword">var</span> y = nbi(), ts = <span class="keyword">this</span>.s, ms = m.s;
+  <span class="keyword">var</span> nsh = <span class="keyword">this</span>.DB-nbits(pm[pm.t-<span class="number">1</span>]);	<span class="comment">// normalize modulus</span>
+  <span class="keyword">if</span>(nsh &gt; <span class="number">0</span>) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
+  <span class="keyword">else</span> { pm.copyTo(y); pt.copyTo(r); }
+  <span class="keyword">var</span> ys = y.t;
+  <span class="keyword">var</span> y0 = y[ys-<span class="number">1</span>];
+  <span class="keyword">if</span>(y0 == <span class="number">0</span>) <span class="keyword">return</span>;
+  <span class="keyword">var</span> yt = y0*(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">this.F1)+((ys</span>&gt;</span>1)?y[ys-2]&gt;&gt;this.F2:0);
+  var d1 = this.FV/yt, d2 = (1<span class="tag">&lt;<span class="title">&lt;this.F1)</span>/<span class="attribute">yt</span>, <span class="attribute">e</span> = <span class="attribute">1</span>&lt;&lt;<span class="attribute">this.F2</span>;
+  <span class="attribute">var</span> <span class="attribute">i</span> = <span class="attribute">r.t</span>, <span class="attribute">j</span> = <span class="attribute">i-ys</span>, <span class="attribute">t</span> = (<span class="attribute">q</span>=<span class="value">=null)?nbi():q;</span>
+  <span class="attribute">y.dlShiftTo</span>(<span class="attribute">j</span>,<span class="attribute">t</span>);
+  <span class="attribute">if</span>(<span class="attribute">r.compareTo</span>(<span class="attribute">t</span>) &gt;</span>= 0) {
+    r[r.t++] = 1;
+    r.subTo(t,r);
+  }
+  exports.BigInteger.ONE.dlShiftTo(ys,t);
+  t.subTo(y,y);	// "negative" y so we can replace sub with am later
+  while(y.t <span class="tag">&lt; <span class="attribute">ys</span>) <span class="attribute">y</span>[<span class="attribute">y.t</span>++] = <span class="attribute">0</span>;
+  <span class="attribute">while</span>(<span class="attribute">--j</span> &gt;</span>= 0) {
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Estimate quotient digit</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> qd = (r[--i]==y0)?<span class="keyword">this</span>.DM:Math.floor(r[i]*d1+(r[i-<span class="number">1</span>]+e)*d2);
+    <span class="keyword">if</span>((r[i]+=y.am(<span class="number">0</span>,qd,r,j,<span class="number">0</span>,ys)) &lt; qd) {	<span class="comment">// Try it out</span>
+      y.dlShiftTo(j,t);
+      r.subTo(t,r);
+      <span class="keyword">while</span>(r[i] &lt; --qd) r.subTo(t,r);
+    }
+  }
+  <span class="keyword">if</span>(q != <span class="literal">null</span>) {
+    r.drShiftTo(ys,q);
+    <span class="keyword">if</span>(ts != ms) exports.BigInteger.ZERO.subTo(q,q);
+  }
+  r.t = ys;
+  r.clamp();
+  <span class="keyword">if</span>(nsh &gt; <span class="number">0</span>) r.rShiftTo(nsh,r);	<span class="comment">// Denormalize remainder</span>
+  <span class="keyword">if</span>(ts &lt; <span class="number">0</span>) exports.BigInteger.ZERO.subTo(r,r);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>(public) this mod a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnMod</span><span class="params">(a)</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  <span class="keyword">this</span>.abs().divRemTo(a,<span class="literal">null</span>,r);
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s &lt; <span class="number">0</span> &amp;&amp; r.compareTo(exports.BigInteger.ZERO) &gt; <span class="number">0</span>) a.subTo(r,r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Modular reduction using &quot;classic&quot; algorithm</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Classic</span><span class="params">(m)</span> {</span> <span class="keyword">this</span>.m = m; }
+<span class="function"><span class="keyword">function</span> <span class="title">cConvert</span><span class="params">(x)</span> {</span>
+  <span class="keyword">if</span>(x.s &lt; <span class="number">0</span> || x.compareTo(<span class="keyword">this</span>.m) &gt;= <span class="number">0</span>) <span class="keyword">return</span> x.mod(<span class="keyword">this</span>.m);
+  <span class="keyword">else</span> <span class="keyword">return</span> x;
+}
+<span class="function"><span class="keyword">function</span> <span class="title">cRevert</span><span class="params">(x)</span> {</span> <span class="keyword">return</span> x; }
+<span class="function"><span class="keyword">function</span> <span class="title">cReduce</span><span class="params">(x)</span> {</span> x.divRemTo(<span class="keyword">this</span>.m,<span class="literal">null</span>,x); }
+<span class="function"><span class="keyword">function</span> <span class="title">cMulTo</span><span class="params">(x,y,r)</span> {</span> x.multiplyTo(y,r); <span class="keyword">this</span>.reduce(r); }
+<span class="function"><span class="keyword">function</span> <span class="title">cSqrTo</span><span class="params">(x,r)</span> {</span> x.squareTo(r); <span class="keyword">this</span>.reduce(r); }
+
+Classic.prototype.convert = cConvert;
+Classic.prototype.revert = cRevert;
+Classic.prototype.reduce = cReduce;
+Classic.prototype.mulTo = cMulTo;
+Classic.prototype.sqrTo = cSqrTo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>(protected) return &quot;-1/this % 2^DB&quot;; useful for Mont. reduction
+justification:
+        xy == 1 (mod m)
+        xy =  1+km
+  xy(2-xy) = (1+km)(1-km)
+x[y(2-xy)] = 1-k^2m^2
+x[y(2-xy)] == 1 (mod m^2)
+if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
+should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
+JS multiply &quot;overflows&quot; differently from C/C++, so care is needed here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpInvDigit</span><span class="params">()</span> {</span>
+  <span class="keyword">if</span>(<span class="keyword">this</span>.t &lt; <span class="number">1</span>) <span class="keyword">return</span> <span class="number">0</span>;
+  <span class="keyword">var</span> x = <span class="keyword">this</span>[<span class="number">0</span>];
+  <span class="keyword">if</span>((x&amp;<span class="number">1</span>) == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;
+  <span class="keyword">var</span> y = x&amp;<span class="number">3</span>;		<span class="comment">// y == 1/x mod 2^2</span>
+  y = (y*(<span class="number">2</span>-(x&amp;<span class="number">0xf</span>)*y))&amp;<span class="number">0xf</span>;	<span class="comment">// y == 1/x mod 2^4</span>
+  y = (y*(<span class="number">2</span>-(x&amp;<span class="number">0xff</span>)*y))&amp;<span class="number">0xff</span>;	<span class="comment">// y == 1/x mod 2^8</span>
+  y = (y*(<span class="number">2</span>-(((x&amp;<span class="number">0xffff</span>)*y)&amp;<span class="number">0xffff</span>)))&amp;<span class="number">0xffff</span>;	<span class="comment">// y == 1/x mod 2^16</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>last step - calculate inverse mod DV directly;
+assumes 16 &lt; DB &lt;= 32 and assumes ability to handle 48-bit ints</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  y = (y*(<span class="number">2</span>-x*y%<span class="keyword">this</span>.DV))%<span class="keyword">this</span>.DV;		<span class="comment">// y == 1/x mod 2^dbits</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>we really want the negative inverse, and -DV &lt; y &lt; DV</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> (y&gt;<span class="number">0</span>)?<span class="keyword">this</span>.DV-y:-y;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Montgomery reduction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Montgomery</span><span class="params">(m)</span> {</span>
+  <span class="keyword">this</span>.m = m;
+  <span class="keyword">this</span>.mp = m.invDigit();
+  <span class="keyword">this</span>.mpl = <span class="keyword">this</span>.mp&amp;<span class="number">0x7fff</span>;
+  <span class="keyword">this</span>.mph = <span class="keyword">this</span>.mp&gt;&gt;<span class="number">15</span>;
+  <span class="keyword">this</span>.um = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(m.DB-15))-1;
+</span>  <span class="attribute">this.mt2</span> = <span class="attribute">2</span>*<span class="attribute">m.t</span>;
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>xR mod m</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">montConvert</span><span class="params">(x)</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  x.abs().dlShiftTo(<span class="keyword">this</span>.m.t,r);
+  r.divRemTo(<span class="keyword">this</span>.m,<span class="literal">null</span>,r);
+  <span class="keyword">if</span>(x.s &lt; <span class="number">0</span> &amp;&amp; r.compareTo(exports.BigInteger.ZERO) &gt; <span class="number">0</span>) <span class="keyword">this</span>.m.subTo(r,r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>x/R mod m</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">montRevert</span><span class="params">(x)</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  x.copyTo(r);
+  <span class="keyword">this</span>.reduce(r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>x = x/R mod m (HAC 14.32)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">montReduce</span><span class="params">(x)</span> {</span>
+  <span class="keyword">while</span>(x.t &lt;= <span class="keyword">this</span>.mt2)	<span class="comment">// pad x so am has enough room later</span>
+    x[x.t++] = <span class="number">0</span>;
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.m.t; ++i) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>faster way of calculating u0 = x[i]*mp mod DV</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> j = x[i]&amp;<span class="number">0x7fff</span>;
+    <span class="keyword">var</span> u0 = (j*<span class="keyword">this</span>.mpl+(((j*<span class="keyword">this</span>.mph+(x[i]&gt;&gt;<span class="number">15</span>)*<span class="keyword">this</span>.mpl)&amp;<span class="keyword">this</span>.um)&lt;<span class="xml"><span class="tag">&lt;<span class="title">15))&amp;x.DM;
+</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>use am to combine the multiply-shift-add into one call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    j = i+<span class="keyword">this</span>.m.t;
+    x[j] += <span class="keyword">this</span>.m.am(<span class="number">0</span>,u0,x,i,<span class="number">0</span>,<span class="keyword">this</span>.m.t);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>propagate carry</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">while</span>(x[j] &gt;= x.DV) { x[j] -= x.DV; x[++j]++; }
+  }
+  x.clamp();
+  x.drShiftTo(<span class="keyword">this</span>.m.t,x);
+  <span class="keyword">if</span>(x.compareTo(<span class="keyword">this</span>.m) &gt;= <span class="number">0</span>) x.subTo(<span class="keyword">this</span>.m,x);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>r = &quot;x^2/R mod m&quot;; x != r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">montSqrTo</span><span class="params">(x,r)</span> {</span> x.squareTo(r); <span class="keyword">this</span>.reduce(r); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>r = &quot;xy/R mod m&quot;; x,y != r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">montMulTo</span><span class="params">(x,y,r)</span> {</span> x.multiplyTo(y,r); <span class="keyword">this</span>.reduce(r); }
+
+Montgomery.prototype.convert = montConvert;
+Montgomery.prototype.revert = montRevert;
+Montgomery.prototype.reduce = montReduce;
+Montgomery.prototype.mulTo = montMulTo;
+Montgomery.prototype.sqrTo = montSqrTo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>(protected) true iff this is even</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpIsEven</span><span class="params">()</span> {</span> <span class="keyword">return</span> ((<span class="keyword">this</span>.t&gt;<span class="number">0</span>)?(<span class="keyword">this</span>[<span class="number">0</span>]&amp;<span class="number">1</span>):<span class="keyword">this</span>.s) == <span class="number">0</span>; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>(protected) this^e, e &lt; 2^32, doing sqr and mul with &quot;r&quot; (HAC 14.79)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpExp</span><span class="params">(e,z)</span> {</span>
+  <span class="keyword">if</span>(e &gt; <span class="number">0xffffffff</span> || e &lt; <span class="number">1</span>) <span class="keyword">return</span> exports.BigInteger.ONE;
+  <span class="keyword">var</span> r = nbi(), r2 = nbi(), g = z.convert(<span class="keyword">this</span>), i = nbits(e)-<span class="number">1</span>;
+  g.copyTo(r);
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) {
+    z.sqrTo(r,r2);
+    <span class="keyword">if</span>((e&amp;(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">i))</span> &gt;</span> 0) z.mulTo(r2,g,r);
+    else { var t = r; r = r2; r2 = t; }
+  }
+  return z.revert(r);
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>(public) this^e % m, 0 &lt;= e &lt; 2^32</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnModPowInt</span><span class="params">(e,m)</span> {</span>
+  <span class="keyword">var</span> z;
+  <span class="keyword">if</span>(e &lt; <span class="number">256</span> || m.isEven()) z = <span class="keyword">new</span> Classic(m); <span class="keyword">else</span> z = <span class="keyword">new</span> Montgomery(m);
+  <span class="keyword">return</span> <span class="keyword">this</span>.exp(e,z);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>protected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.prototype.copyTo = bnpCopyTo;
+exports.BigInteger.prototype.fromInt = bnpFromInt;
+exports.BigInteger.prototype.fromString = bnpFromString;
+exports.BigInteger.prototype.clamp = bnpClamp;
+exports.BigInteger.prototype.dlShiftTo = bnpDLShiftTo;
+exports.BigInteger.prototype.drShiftTo = bnpDRShiftTo;
+exports.BigInteger.prototype.lShiftTo = bnpLShiftTo;
+exports.BigInteger.prototype.rShiftTo = bnpRShiftTo;
+exports.BigInteger.prototype.subTo = bnpSubTo;
+exports.BigInteger.prototype.multiplyTo = bnpMultiplyTo;
+exports.BigInteger.prototype.squareTo = bnpSquareTo;
+exports.BigInteger.prototype.divRemTo = bnpDivRemTo;
+exports.BigInteger.prototype.invDigit = bnpInvDigit;
+exports.BigInteger.prototype.isEven = bnpIsEven;
+exports.BigInteger.prototype.exp = bnpExp;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>public</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.prototype.toString = bnToString;
+exports.BigInteger.prototype.negate = bnNegate;
+exports.BigInteger.prototype.abs = bnAbs;
+exports.BigInteger.prototype.compareTo = bnCompareTo;
+exports.BigInteger.prototype.bitLength = bnBitLength;
+exports.BigInteger.prototype.mod = bnMod;
+exports.BigInteger.prototype.modPowInt = bnModPowInt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>&quot;constants&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.ZERO = nbv(<span class="number">0</span>);
+exports.BigInteger.ONE = nbv(<span class="number">1</span>);
+
+<span class="comment">/*
+ *
+ * START JSBN2
+ *
+ */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Copyright (c) 2005-2009  Tom Wu
+All Rights Reserved.
+See &quot;LICENSE&quot; for details.</p>
+<p>Extended JavaScript BN functions, required for RSA private ops.</p>
+<p>Version 1.1: new BigInteger(&quot;0&quot;, 10) returns &quot;proper&quot; zero
+Version 1.2: square() API, isProbablePrime fix</p>
+<p>(public)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnClone</span><span class="params">()</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.copyTo(r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>(public) return value as integer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnIntValue</span><span class="params">()</span> {</span>
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s &lt; <span class="number">0</span>) {
+    <span class="keyword">if</span>(<span class="keyword">this</span>.t == <span class="number">1</span>) <span class="keyword">return</span> <span class="keyword">this</span>[<span class="number">0</span>]-<span class="keyword">this</span>.DV;
+    <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.t == <span class="number">0</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+  }
+  <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.t == <span class="number">1</span>) <span class="keyword">return</span> <span class="keyword">this</span>[<span class="number">0</span>];
+  <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.t == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>assumes 16 &lt; DB &lt; 32</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> ((<span class="keyword">this</span>[<span class="number">1</span>]&amp;((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(32-this.DB))-1))&lt;&lt;this.DB)|this[0];
+}
+
+</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>(public) return value as byte</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnByteValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;<span class="xml"><span class="tag">&lt;<span class="title">24)</span>&gt;</span>&gt;24; }
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>(public) return value as short (assumes DB&gt;=16)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnShortValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;<span class="xml"><span class="tag">&lt;<span class="title">16)</span>&gt;</span>&gt;16; }
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>(protected) return x s.t. r^x &lt; DV</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpChunkSize</span><span class="params">(r)</span> {</span> <span class="keyword">return</span> Math.floor(Math.LN2*<span class="keyword">this</span>.DB/Math.log(r)); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>(public) 0 if this == 0, 1 if this &gt; 0</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnSigNum</span><span class="params">()</span> {</span>
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s &lt; <span class="number">0</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.t &lt;= <span class="number">0</span> || (<span class="keyword">this</span>.t == <span class="number">1</span> &amp;&amp; <span class="keyword">this</span>[<span class="number">0</span>] &lt;= <span class="number">0</span>)) <span class="keyword">return</span> <span class="number">0</span>;
+  <span class="keyword">else</span> <span class="keyword">return</span> <span class="number">1</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>(protected) convert to radix string</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpToRadix</span><span class="params">(b)</span> {</span>
+  <span class="keyword">if</span>(b == <span class="literal">null</span>) b = <span class="number">10</span>;
+  <span class="keyword">if</span>(<span class="keyword">this</span>.signum() == <span class="number">0</span> || b &lt; <span class="number">2</span> || b &gt; <span class="number">36</span>) <span class="keyword">return</span> <span class="string">"0"</span>;
+  <span class="keyword">var</span> cs = <span class="keyword">this</span>.chunkSize(b);
+  <span class="keyword">var</span> a = Math.pow(b,cs);
+  <span class="keyword">var</span> d = nbv(a), y = nbi(), z = nbi(), r = <span class="string">""</span>;
+  <span class="keyword">this</span>.divRemTo(d,y,z);
+  <span class="keyword">while</span>(y.signum() &gt; <span class="number">0</span>) {
+    r = (a+z.intValue()).toString(b).substr(<span class="number">1</span>) + r;
+    y.divRemTo(d,y,z);
+  }
+  <span class="keyword">return</span> z.intValue().toString(b) + r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>(protected) convert from radix string</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpFromRadix</span><span class="params">(s,b)</span> {</span>
+  <span class="keyword">this</span>.fromInt(<span class="number">0</span>);
+  <span class="keyword">if</span>(b == <span class="literal">null</span>) b = <span class="number">10</span>;
+  <span class="keyword">var</span> cs = <span class="keyword">this</span>.chunkSize(b);
+  <span class="keyword">var</span> d = Math.pow(b,cs), mi = <span class="literal">false</span>, j = <span class="number">0</span>, w = <span class="number">0</span>;
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; s.length; ++i) {
+    <span class="keyword">var</span> x = intAt(s,i);
+    <span class="keyword">if</span>(x &lt; <span class="number">0</span>) {
+      <span class="keyword">if</span>(s.charAt(i) == <span class="string">"-"</span> &amp;&amp; <span class="keyword">this</span>.signum() == <span class="number">0</span>) mi = <span class="literal">true</span>;
+      <span class="keyword">continue</span>;
+    }
+    w = b*w+x;
+    <span class="keyword">if</span>(++j &gt;= cs) {
+      <span class="keyword">this</span>.dMultiply(d);
+      <span class="keyword">this</span>.dAddOffset(w,<span class="number">0</span>);
+      j = <span class="number">0</span>;
+      w = <span class="number">0</span>;
+    }
+  }
+  <span class="keyword">if</span>(j &gt; <span class="number">0</span>) {
+    <span class="keyword">this</span>.dMultiply(Math.pow(b,j));
+    <span class="keyword">this</span>.dAddOffset(w,<span class="number">0</span>);
+  }
+  <span class="keyword">if</span>(mi) exports.BigInteger.ZERO.subTo(<span class="keyword">this</span>,<span class="keyword">this</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>(protected) alternate constructor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpFromNumber</span><span class="params">(a,b,c)</span> {</span>
+  <span class="keyword">if</span>(<span class="string">"number"</span> == <span class="keyword">typeof</span> b) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>new exports.BigInteger(int,int,RNG)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(a &lt; <span class="number">2</span>) <span class="keyword">this</span>.fromInt(<span class="number">1</span>);
+    <span class="keyword">else</span> {
+      <span class="keyword">this</span>.fromNumber(a,c);
+      <span class="keyword">if</span>(!<span class="keyword">this</span>.testBit(a-<span class="number">1</span>))	<span class="comment">// force MSB set</span>
+        <span class="keyword">this</span>.bitwiseTo(exports.BigInteger.ONE.shiftLeft(a-<span class="number">1</span>),op_or,<span class="keyword">this</span>);
+      <span class="keyword">if</span>(<span class="keyword">this</span>.isEven()) <span class="keyword">this</span>.dAddOffset(<span class="number">1</span>,<span class="number">0</span>); <span class="comment">// force odd</span>
+      <span class="keyword">while</span>(!<span class="keyword">this</span>.isProbablePrime(b)) {
+        <span class="keyword">this</span>.dAddOffset(<span class="number">2</span>,<span class="number">0</span>);
+        <span class="keyword">if</span>(<span class="keyword">this</span>.bitLength() &gt; a) <span class="keyword">this</span>.subTo(exports.BigInteger.ONE.shiftLeft(a-<span class="number">1</span>),<span class="keyword">this</span>);
+      }
+    }
+  }
+  <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>new exports.BigInteger(int,RNG)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> x = <span class="keyword">new</span> Array(), t = a&amp;<span class="number">7</span>;
+    x.length = (a&gt;&gt;<span class="number">3</span>)+<span class="number">1</span>;
+    b.nextBytes(x);
+    <span class="keyword">if</span>(t &gt; <span class="number">0</span>) x[<span class="number">0</span>] &amp;= ((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">t)-1);</span> <span class="attribute">else</span> <span class="attribute">x</span>[<span class="attribute">0</span>] = <span class="attribute">0</span>;
+    <span class="attribute">this.fromString</span>(<span class="attribute">x</span>,<span class="attribute">256</span>);
+  }
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>(public) convert to bigendian byte array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnToByteArray</span><span class="params">()</span> {</span>
+  <span class="keyword">var</span> i = <span class="keyword">this</span>.t, r = <span class="keyword">new</span> Array();
+  r[<span class="number">0</span>] = <span class="keyword">this</span>.s;
+  <span class="keyword">var</span> p = <span class="keyword">this</span>.DB-(i*<span class="keyword">this</span>.DB)%<span class="number">8</span>, d, k = <span class="number">0</span>;
+  <span class="keyword">if</span>(i-- &gt; <span class="number">0</span>) {
+    <span class="keyword">if</span>(p &lt; <span class="keyword">this</span>.DB &amp;&amp; (d = <span class="keyword">this</span>[i]&gt;&gt;p) != (<span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM)&gt;&gt;p)
+      r[k++] = d|(<span class="keyword">this</span>.s&lt;<span class="xml"><span class="tag">&lt;<span class="title">(this.DB-p));
+</span>    <span class="attribute">while</span>(<span class="attribute">i</span> &gt;</span>= 0) {
+      if(p <span class="tag">&lt; <span class="attribute">8</span>) {
+        <span class="attribute">d</span> = (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;((<span class="attribute">1</span>&lt;&lt;<span class="attribute">p</span>)<span class="attribute">-1</span>))&lt;&lt;(<span class="attribute">8-p</span>);
+        <span class="attribute">d</span> |= <span class="attribute">this</span>[<span class="attribute">--i</span>]&gt;</span>&gt;(p+=this.DB-8);
+      }
+      else {
+        d = (this[i]&gt;&gt;(p-=8))&amp;0xff;
+        if(p <span class="tag">&lt;<span class="title">=</span> <span class="attribute">0</span>) { <span class="attribute">p</span> += <span class="attribute">this.DB</span>; <span class="attribute">--i</span>; }
+      }
+      <span class="attribute">if</span>((<span class="attribute">d</span>&amp;<span class="attribute">0x80</span>) != <span class="attribute">0</span>) <span class="attribute">d</span> |= <span class="attribute">-256</span>;
+      <span class="attribute">if</span>(<span class="attribute">k</span> =<span class="value">=</span> <span class="attribute">0</span> &amp;&amp; (<span class="attribute">this.s</span>&amp;<span class="attribute">0x80</span>) != (<span class="attribute">d</span>&amp;<span class="attribute">0x80</span>)) ++<span class="attribute">k</span>;
+      <span class="attribute">if</span>(<span class="attribute">k</span> &gt;</span> 0 || d != this.s) r[k++] = d;
+    }
+  }
+  return r;
+}
+
+function bnEquals(a) { return(this.compareTo(a)==0); }
+function bnMin(a) { return(this.compareTo(a)<span class="tag">&lt;<span class="title">0)?this:a;</span> }
+<span class="attribute">function</span> <span class="attribute">bnMax</span>(<span class="attribute">a</span>) { <span class="attribute">return</span>(<span class="attribute">this.compareTo</span>(<span class="attribute">a</span>)&gt;</span>0)?this:a; }
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>(protected) r = this op a (bitwise)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpBitwiseTo</span><span class="params">(a,op,r)</span> {</span>
+  <span class="keyword">var</span> i, f, m = Math.min(a.t,<span class="keyword">this</span>.t);
+  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; m; ++i) r[i] = op(<span class="keyword">this</span>[i],a[i]);
+  <span class="keyword">if</span>(a.t &lt; <span class="keyword">this</span>.t) {
+    f = a.s&amp;<span class="keyword">this</span>.DM;
+    <span class="keyword">for</span>(i = m; i &lt; <span class="keyword">this</span>.t; ++i) r[i] = op(<span class="keyword">this</span>[i],f);
+    r.t = <span class="keyword">this</span>.t;
+  }
+  <span class="keyword">else</span> {
+    f = <span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM;
+    <span class="keyword">for</span>(i = m; i &lt; a.t; ++i) r[i] = op(f,a[i]);
+    r.t = a.t;
+  }
+  r.s = op(<span class="keyword">this</span>.s,a.s);
+  r.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>(public) this &amp; a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">op_and</span><span class="params">(x,y)</span> {</span> <span class="keyword">return</span> x&amp;y; }
+<span class="function"><span class="keyword">function</span> <span class="title">bnAnd</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.bitwiseTo(a,op_and,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>(public) this | a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">op_or</span><span class="params">(x,y)</span> {</span> <span class="keyword">return</span> x|y; }
+<span class="function"><span class="keyword">function</span> <span class="title">bnOr</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.bitwiseTo(a,op_or,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>(public) this ^ a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">op_xor</span><span class="params">(x,y)</span> {</span> <span class="keyword">return</span> x^y; }
+<span class="function"><span class="keyword">function</span> <span class="title">bnXor</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.bitwiseTo(a,op_xor,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>(public) this &amp; ~a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">op_andnot</span><span class="params">(x,y)</span> {</span> <span class="keyword">return</span> x&amp;~y; }
+<span class="function"><span class="keyword">function</span> <span class="title">bnAndNot</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.bitwiseTo(a,op_andnot,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>(public) ~this</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnNot</span><span class="params">()</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.t; ++i) r[i] = <span class="keyword">this</span>.DM&amp;~<span class="keyword">this</span>[i];
+  r.t = <span class="keyword">this</span>.t;
+  r.s = ~<span class="keyword">this</span>.s;
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>(public) this &lt;&lt; n</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnShiftLeft</span><span class="params">(n)</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  <span class="keyword">if</span>(n &lt; <span class="number">0</span>) <span class="keyword">this</span>.rShiftTo(-n,r); <span class="keyword">else</span> <span class="keyword">this</span>.lShiftTo(n,r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>(public) this &gt;&gt; n</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnShiftRight</span><span class="params">(n)</span> {</span>
+  <span class="keyword">var</span> r = nbi();
+  <span class="keyword">if</span>(n &lt; <span class="number">0</span>) <span class="keyword">this</span>.lShiftTo(-n,r); <span class="keyword">else</span> <span class="keyword">this</span>.rShiftTo(n,r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>return index of lowest 1-bit in x, x &lt; 2^31</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">lbit</span><span class="params">(x)</span> {</span>
+  <span class="keyword">if</span>(x == <span class="number">0</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+  <span class="keyword">var</span> r = <span class="number">0</span>;
+  <span class="keyword">if</span>((x&amp;<span class="number">0xffff</span>) == <span class="number">0</span>) { x &gt;&gt;= <span class="number">16</span>; r += <span class="number">16</span>; }
+  <span class="keyword">if</span>((x&amp;<span class="number">0xff</span>) == <span class="number">0</span>) { x &gt;&gt;= <span class="number">8</span>; r += <span class="number">8</span>; }
+  <span class="keyword">if</span>((x&amp;<span class="number">0xf</span>) == <span class="number">0</span>) { x &gt;&gt;= <span class="number">4</span>; r += <span class="number">4</span>; }
+  <span class="keyword">if</span>((x&amp;<span class="number">3</span>) == <span class="number">0</span>) { x &gt;&gt;= <span class="number">2</span>; r += <span class="number">2</span>; }
+  <span class="keyword">if</span>((x&amp;<span class="number">1</span>) == <span class="number">0</span>) ++r;
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>(public) returns index of lowest 1-bit (or -1 if none)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnGetLowestSetBit</span><span class="params">()</span> {</span>
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.t; ++i)
+    <span class="keyword">if</span>(<span class="keyword">this</span>[i] != <span class="number">0</span>) <span class="keyword">return</span> i*<span class="keyword">this</span>.DB+lbit(<span class="keyword">this</span>[i]);
+  <span class="keyword">if</span>(<span class="keyword">this</span>.s &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">this</span>.t*<span class="keyword">this</span>.DB;
+  <span class="keyword">return</span> -<span class="number">1</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>return number of 1 bits in x</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">cbit</span><span class="params">(x)</span> {</span>
+  <span class="keyword">var</span> r = <span class="number">0</span>;
+  <span class="keyword">while</span>(x != <span class="number">0</span>) { x &amp;= x-<span class="number">1</span>; ++r; }
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>(public) return number of set bits</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnBitCount</span><span class="params">()</span> {</span>
+  <span class="keyword">var</span> r = <span class="number">0</span>, x = <span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM;
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.t; ++i) r += cbit(<span class="keyword">this</span>[i]^x);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>(public) true iff nth bit is set</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnTestBit</span><span class="params">(n)</span> {</span>
+  <span class="keyword">var</span> j = Math.floor(n/<span class="keyword">this</span>.DB);
+  <span class="keyword">if</span>(j &gt;= <span class="keyword">this</span>.t) <span class="keyword">return</span>(<span class="keyword">this</span>.s!=<span class="number">0</span>);
+  <span class="keyword">return</span>((<span class="keyword">this</span>[j]&amp;(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(n%this.DB)))!=0);
+}
+
+</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>(protected) this op (1&lt;&lt;n)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpChangeBit</span><span class="params">(n,op)</span> {</span>
+  <span class="keyword">var</span> r = exports.BigInteger.ONE.shiftLeft(n);
+  <span class="keyword">this</span>.bitwiseTo(r,op,r);
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>(public) this | (1&lt;&lt;n)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnSetBit</span><span class="params">(n)</span> {</span> <span class="keyword">return</span> <span class="keyword">this</span>.changeBit(n,op_or); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>(public) this &amp; ~(1&lt;&lt;n)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnClearBit</span><span class="params">(n)</span> {</span> <span class="keyword">return</span> <span class="keyword">this</span>.changeBit(n,op_andnot); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>(public) this ^ (1&lt;&lt;n)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnFlipBit</span><span class="params">(n)</span> {</span> <span class="keyword">return</span> <span class="keyword">this</span>.changeBit(n,op_xor); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>(protected) r = this + a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpAddTo</span><span class="params">(a,r)</span> {</span>
+  <span class="keyword">var</span> i = <span class="number">0</span>, c = <span class="number">0</span>, m = Math.min(a.t,<span class="keyword">this</span>.t);
+  <span class="keyword">while</span>(i &lt; m) {
+    c += <span class="keyword">this</span>[i]+a[i];
+    r[i++] = c&amp;<span class="keyword">this</span>.DM;
+    c &gt;&gt;= <span class="keyword">this</span>.DB;
+  }
+  <span class="keyword">if</span>(a.t &lt; <span class="keyword">this</span>.t) {
+    c += a.s;
+    <span class="keyword">while</span>(i &lt; <span class="keyword">this</span>.t) {
+      c += <span class="keyword">this</span>[i];
+      r[i++] = c&amp;<span class="keyword">this</span>.DM;
+      c &gt;&gt;= <span class="keyword">this</span>.DB;
+    }
+    c += <span class="keyword">this</span>.s;
+  }
+  <span class="keyword">else</span> {
+    c += <span class="keyword">this</span>.s;
+    <span class="keyword">while</span>(i &lt; a.t) {
+      c += a[i];
+      r[i++] = c&amp;<span class="keyword">this</span>.DM;
+      c &gt;&gt;= <span class="keyword">this</span>.DB;
+    }
+    c += a.s;
+  }
+  r.s = (c&lt;<span class="number">0</span>)?-<span class="number">1</span>:<span class="number">0</span>;
+  <span class="keyword">if</span>(c &gt; <span class="number">0</span>) r[i++] = c;
+  <span class="keyword">else</span> <span class="keyword">if</span>(c &lt; -<span class="number">1</span>) r[i++] = <span class="keyword">this</span>.DV+c;
+  r.t = i;
+  r.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>(public) this + a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnAdd</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.addTo(a,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>(public) this - a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnSubtract</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.subTo(a,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>(public) this * a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnMultiply</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.multiplyTo(a,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>(public) this^2</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnSquare</span><span class="params">()</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.squareTo(r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>(public) this / a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnDivide</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.divRemTo(a,r,<span class="literal">null</span>); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>(public) this % a</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnRemainder</span><span class="params">(a)</span> {</span> <span class="keyword">var</span> r = nbi(); <span class="keyword">this</span>.divRemTo(a,<span class="literal">null</span>,r); <span class="keyword">return</span> r; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>(public) [this/a,this%a]</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnDivideAndRemainder</span><span class="params">(a)</span> {</span>
+  <span class="keyword">var</span> q = nbi(), r = nbi();
+  <span class="keyword">this</span>.divRemTo(a,q,r);
+  <span class="keyword">return</span> <span class="keyword">new</span> Array(q,r);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>(protected) this *= n, this &gt;= 0, 1 &lt; n &lt; DV</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpDMultiply</span><span class="params">(n)</span> {</span>
+  <span class="keyword">this</span>[<span class="keyword">this</span>.t] = <span class="keyword">this</span>.am(<span class="number">0</span>,n-<span class="number">1</span>,<span class="keyword">this</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="keyword">this</span>.t);
+  ++<span class="keyword">this</span>.t;
+  <span class="keyword">this</span>.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>(protected) this += n &lt;&lt; w words, this &gt;= 0</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpDAddOffset</span><span class="params">(n,w)</span> {</span>
+  <span class="keyword">if</span>(n == <span class="number">0</span>) <span class="keyword">return</span>;
+  <span class="keyword">while</span>(<span class="keyword">this</span>.t &lt;= w) <span class="keyword">this</span>[<span class="keyword">this</span>.t++] = <span class="number">0</span>;
+  <span class="keyword">this</span>[w] += n;
+  <span class="keyword">while</span>(<span class="keyword">this</span>[w] &gt;= <span class="keyword">this</span>.DV) {
+    <span class="keyword">this</span>[w] -= <span class="keyword">this</span>.DV;
+    <span class="keyword">if</span>(++w &gt;= <span class="keyword">this</span>.t) <span class="keyword">this</span>[<span class="keyword">this</span>.t++] = <span class="number">0</span>;
+    ++<span class="keyword">this</span>[w];
+  }
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>A &quot;null&quot; reducer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">NullExp</span><span class="params">()</span> {</span>}
+<span class="function"><span class="keyword">function</span> <span class="title">nNop</span><span class="params">(x)</span> {</span> <span class="keyword">return</span> x; }
+<span class="function"><span class="keyword">function</span> <span class="title">nMulTo</span><span class="params">(x,y,r)</span> {</span> x.multiplyTo(y,r); }
+<span class="function"><span class="keyword">function</span> <span class="title">nSqrTo</span><span class="params">(x,r)</span> {</span> x.squareTo(r); }
+
+NullExp.prototype.convert = nNop;
+NullExp.prototype.revert = nNop;
+NullExp.prototype.mulTo = nMulTo;
+NullExp.prototype.sqrTo = nSqrTo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>(public) this^e</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnPow</span><span class="params">(e)</span> {</span> <span class="keyword">return</span> <span class="keyword">this</span>.exp(e,<span class="keyword">new</span> NullExp()); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>(protected) r = lower n words of &quot;this * a&quot;, a.t &lt;= n
+&quot;this&quot; should be the larger one if appropriate.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpMultiplyLowerTo</span><span class="params">(a,n,r)</span> {</span>
+  <span class="keyword">var</span> i = Math.min(<span class="keyword">this</span>.t+a.t,n);
+  r.s = <span class="number">0</span>; <span class="comment">// assumes a,this &gt;= 0</span>
+  r.t = i;
+  <span class="keyword">while</span>(i &gt; <span class="number">0</span>) r[--i] = <span class="number">0</span>;
+  <span class="keyword">var</span> j;
+  <span class="keyword">for</span>(j = r.t-<span class="keyword">this</span>.t; i &lt; j; ++i) r[i+<span class="keyword">this</span>.t] = <span class="keyword">this</span>.am(<span class="number">0</span>,a[i],r,i,<span class="number">0</span>,<span class="keyword">this</span>.t);
+  <span class="keyword">for</span>(j = Math.min(a.t,n); i &lt; j; ++i) <span class="keyword">this</span>.am(<span class="number">0</span>,a[i],r,i,<span class="number">0</span>,n-i);
+  r.clamp();
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p>(protected) r = &quot;this * a&quot; without lower n words, n &gt; 0
+&quot;this&quot; should be the larger one if appropriate.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpMultiplyUpperTo</span><span class="params">(a,n,r)</span> {</span>
+  --n;
+  <span class="keyword">var</span> i = r.t = <span class="keyword">this</span>.t+a.t-n;
+  r.s = <span class="number">0</span>; <span class="comment">// assumes a,this &gt;= 0</span>
+  <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) r[i] = <span class="number">0</span>;
+  <span class="keyword">for</span>(i = Math.max(n-<span class="keyword">this</span>.t,<span class="number">0</span>); i &lt; a.t; ++i)
+    r[<span class="keyword">this</span>.t+i-n] = <span class="keyword">this</span>.am(n-i,a[i],r,<span class="number">0</span>,<span class="number">0</span>,<span class="keyword">this</span>.t+i-n);
+  r.clamp();
+  r.drShiftTo(<span class="number">1</span>,r);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>Barrett modular reduction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Barrett</span><span class="params">(m)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>setup Barrett</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.r2 = nbi();
+  <span class="keyword">this</span>.q3 = nbi();
+  exports.BigInteger.ONE.dlShiftTo(<span class="number">2</span>*m.t,<span class="keyword">this</span>.r2);
+  <span class="keyword">this</span>.mu = <span class="keyword">this</span>.r2.divide(m);
+  <span class="keyword">this</span>.m = m;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">barrettConvert</span><span class="params">(x)</span> {</span>
+  <span class="keyword">if</span>(x.s &lt; <span class="number">0</span> || x.t &gt; <span class="number">2</span>*<span class="keyword">this</span>.m.t) <span class="keyword">return</span> x.mod(<span class="keyword">this</span>.m);
+  <span class="keyword">else</span> <span class="keyword">if</span>(x.compareTo(<span class="keyword">this</span>.m) &lt; <span class="number">0</span>) <span class="keyword">return</span> x;
+  <span class="keyword">else</span> { <span class="keyword">var</span> r = nbi(); x.copyTo(r); <span class="keyword">this</span>.reduce(r); <span class="keyword">return</span> r; }
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">barrettRevert</span><span class="params">(x)</span> {</span> <span class="keyword">return</span> x; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p>x = x mod m (HAC 14.42)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">barrettReduce</span><span class="params">(x)</span> {</span>
+  x.drShiftTo(<span class="keyword">this</span>.m.t-<span class="number">1</span>,<span class="keyword">this</span>.r2);
+  <span class="keyword">if</span>(x.t &gt; <span class="keyword">this</span>.m.t+<span class="number">1</span>) { x.t = <span class="keyword">this</span>.m.t+<span class="number">1</span>; x.clamp(); }
+  <span class="keyword">this</span>.mu.multiplyUpperTo(<span class="keyword">this</span>.r2,<span class="keyword">this</span>.m.t+<span class="number">1</span>,<span class="keyword">this</span>.q3);
+  <span class="keyword">this</span>.m.multiplyLowerTo(<span class="keyword">this</span>.q3,<span class="keyword">this</span>.m.t+<span class="number">1</span>,<span class="keyword">this</span>.r2);
+  <span class="keyword">while</span>(x.compareTo(<span class="keyword">this</span>.r2) &lt; <span class="number">0</span>) x.dAddOffset(<span class="number">1</span>,<span class="keyword">this</span>.m.t+<span class="number">1</span>);
+  x.subTo(<span class="keyword">this</span>.r2,x);
+  <span class="keyword">while</span>(x.compareTo(<span class="keyword">this</span>.m) &gt;= <span class="number">0</span>) x.subTo(<span class="keyword">this</span>.m,x);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-97">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-97">&#182;</a>
+              </div>
+              <p>r = x^2 mod m; x != r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">barrettSqrTo</span><span class="params">(x,r)</span> {</span> x.squareTo(r); <span class="keyword">this</span>.reduce(r); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-98">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-98">&#182;</a>
+              </div>
+              <p>r = x*y mod m; x,y != r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">barrettMulTo</span><span class="params">(x,y,r)</span> {</span> x.multiplyTo(y,r); <span class="keyword">this</span>.reduce(r); }
+
+Barrett.prototype.convert = barrettConvert;
+Barrett.prototype.revert = barrettRevert;
+Barrett.prototype.reduce = barrettReduce;
+Barrett.prototype.mulTo = barrettMulTo;
+Barrett.prototype.sqrTo = barrettSqrTo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-99">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-99">&#182;</a>
+              </div>
+              <p>(public) this^e % m (HAC 14.85)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnModPow</span><span class="params">(e,m)</span> {</span>
+  <span class="keyword">var</span> i = e.bitLength(), k, r = nbv(<span class="number">1</span>), z;
+  <span class="keyword">if</span>(i &lt;= <span class="number">0</span>) <span class="keyword">return</span> r;
+  <span class="keyword">else</span> <span class="keyword">if</span>(i &lt; <span class="number">18</span>) k = <span class="number">1</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(i &lt; <span class="number">48</span>) k = <span class="number">3</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(i &lt; <span class="number">144</span>) k = <span class="number">4</span>;
+  <span class="keyword">else</span> <span class="keyword">if</span>(i &lt; <span class="number">768</span>) k = <span class="number">5</span>;
+  <span class="keyword">else</span> k = <span class="number">6</span>;
+  <span class="keyword">if</span>(i &lt; <span class="number">8</span>)
+    z = <span class="keyword">new</span> Classic(m);
+  <span class="keyword">else</span> <span class="keyword">if</span>(m.isEven())
+    z = <span class="keyword">new</span> Barrett(m);
+  <span class="keyword">else</span>
+    z = <span class="keyword">new</span> Montgomery(m);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-100">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-100">&#182;</a>
+              </div>
+              <p>precomputation</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> g = <span class="keyword">new</span> Array(), n = <span class="number">3</span>, k1 = k-<span class="number">1</span>, km = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">k)-1;
+</span>  <span class="attribute">g</span>[<span class="attribute">1</span>] = <span class="attribute">z.convert</span>(<span class="attribute">this</span>);
+  <span class="attribute">if</span>(<span class="attribute">k</span> &gt;</span> 1) {
+    var g2 = nbi();
+    z.sqrTo(g[1],g2);
+    while(n <span class="tag">&lt;<span class="title">=</span> <span class="attribute">km</span>) {
+      <span class="attribute">g</span>[<span class="attribute">n</span>] = <span class="attribute">nbi</span>();
+      <span class="attribute">z.mulTo</span>(<span class="attribute">g2</span>,<span class="attribute">g</span>[<span class="attribute">n-2</span>],<span class="attribute">g</span>[<span class="attribute">n</span>]);
+      <span class="attribute">n</span> += <span class="attribute">2</span>;
+    }
+  }
+
+  <span class="attribute">var</span> <span class="attribute">j</span> = <span class="attribute">e.t-1</span>, <span class="attribute">w</span>, <span class="attribute">is1</span> = <span class="attribute">true</span>, <span class="attribute">r2</span> = <span class="attribute">nbi</span>(), <span class="attribute">t</span>;
+  <span class="attribute">i</span> = <span class="attribute">nbits</span>(<span class="attribute">e</span>[<span class="attribute">j</span>])<span class="attribute">-1</span>;
+  <span class="attribute">while</span>(<span class="attribute">j</span> &gt;</span>= 0) {
+    if(i &gt;= k1) w = (e[j]&gt;&gt;(i-k1))&amp;km;
+    else {
+      w = (e[j]&amp;((1<span class="tag">&lt;<span class="title">&lt;(i+1))-1))&lt;&lt;(k1-i);
+</span>      <span class="attribute">if</span>(<span class="attribute">j</span> &gt;</span> 0) w |= e[j-1]&gt;&gt;(this.DB+i-k1);
+    }
+
+    n = k;
+    while((w&amp;1) == 0) { w &gt;&gt;= 1; --n; }
+    if((i -= n) <span class="tag">&lt; <span class="attribute">0</span>) { <span class="attribute">i</span> += <span class="attribute">this.DB</span>; <span class="attribute">--j</span>; }
+    <span class="attribute">if</span>(<span class="attribute">is1</span>) {	// <span class="attribute">ret</span> =<span class="value">=</span> <span class="attribute">1</span>, <span class="attribute">don</span>'<span class="attribute">t</span> <span class="attribute">bother</span> <span class="attribute">squaring</span> <span class="attribute">or</span> <span class="attribute">multiplying</span> <span class="attribute">it</span>
+      <span class="attribute">g</span>[<span class="attribute">w</span>]<span class="attribute">.copyTo</span>(<span class="attribute">r</span>);
+      <span class="attribute">is1</span> = <span class="attribute">false</span>;
+    }
+    <span class="attribute">else</span> {
+      <span class="attribute">while</span>(<span class="attribute">n</span> &gt;</span> 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
+      if(n &gt; 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
+      z.mulTo(r2,g[w],r);
+    }
+
+    while(j &gt;= 0 &amp;&amp; (e[j]&amp;(1<span class="tag">&lt;<span class="title">&lt;i))</span> =<span class="value">=</span> <span class="attribute">0</span>) {
+      <span class="attribute">z.sqrTo</span>(<span class="attribute">r</span>,<span class="attribute">r2</span>); <span class="attribute">t</span> = <span class="attribute">r</span>; <span class="attribute">r</span> = <span class="attribute">r2</span>; <span class="attribute">r2</span> = <span class="attribute">t</span>;
+      <span class="attribute">if</span>(<span class="attribute">--i</span> &lt; <span class="attribute">0</span>) { <span class="attribute">i</span> = <span class="attribute">this.DB-1</span>; <span class="attribute">--j</span>; }
+    }
+  }
+  <span class="attribute">return</span> <span class="attribute">z.revert</span>(<span class="attribute">r</span>);
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-101">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-101">&#182;</a>
+              </div>
+              <p>(public) gcd(this,a) (HAC 14.54)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnGCD</span><span class="params">(a)</span> {</span>
+  <span class="keyword">var</span> x = (<span class="keyword">this</span>.s&lt;<span class="number">0</span>)?<span class="keyword">this</span>.negate():<span class="keyword">this</span>.clone();
+  <span class="keyword">var</span> y = (a.s&lt;<span class="number">0</span>)?a.negate():a.clone();
+  <span class="keyword">if</span>(x.compareTo(y) &lt; <span class="number">0</span>) { <span class="keyword">var</span> t = x; x = y; y = t; }
+  <span class="keyword">var</span> i = x.getLowestSetBit(), g = y.getLowestSetBit();
+  <span class="keyword">if</span>(g &lt; <span class="number">0</span>) <span class="keyword">return</span> x;
+  <span class="keyword">if</span>(i &lt; g) g = i;
+  <span class="keyword">if</span>(g &gt; <span class="number">0</span>) {
+    x.rShiftTo(g,x);
+    y.rShiftTo(g,y);
+  }
+  <span class="keyword">while</span>(x.signum() &gt; <span class="number">0</span>) {
+    <span class="keyword">if</span>((i = x.getLowestSetBit()) &gt; <span class="number">0</span>) x.rShiftTo(i,x);
+    <span class="keyword">if</span>((i = y.getLowestSetBit()) &gt; <span class="number">0</span>) y.rShiftTo(i,y);
+    <span class="keyword">if</span>(x.compareTo(y) &gt;= <span class="number">0</span>) {
+      x.subTo(y,x);
+      x.rShiftTo(<span class="number">1</span>,x);
+    }
+    <span class="keyword">else</span> {
+      y.subTo(x,y);
+      y.rShiftTo(<span class="number">1</span>,y);
+    }
+  }
+  <span class="keyword">if</span>(g &gt; <span class="number">0</span>) y.lShiftTo(g,y);
+  <span class="keyword">return</span> y;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-102">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-102">&#182;</a>
+              </div>
+              <p>(protected) this % n, n &lt; 2^26</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpModInt</span><span class="params">(n)</span> {</span>
+  <span class="keyword">if</span>(n &lt;= <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;
+  <span class="keyword">var</span> d = <span class="keyword">this</span>.DV%n, r = (<span class="keyword">this</span>.s&lt;<span class="number">0</span>)?n-<span class="number">1</span>:<span class="number">0</span>;
+  <span class="keyword">if</span>(<span class="keyword">this</span>.t &gt; <span class="number">0</span>)
+    <span class="keyword">if</span>(d == <span class="number">0</span>) r = <span class="keyword">this</span>[<span class="number">0</span>]%n;
+    <span class="keyword">else</span> <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="keyword">this</span>.t-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) r = (d*r+<span class="keyword">this</span>[i])%n;
+  <span class="keyword">return</span> r;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-103">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-103">&#182;</a>
+              </div>
+              <p>(public) 1/this % m (HAC 14.61)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnModInverse</span><span class="params">(m)</span> {</span>
+  <span class="keyword">var</span> ac = m.isEven();
+  <span class="keyword">if</span>((<span class="keyword">this</span>.isEven() &amp;&amp; ac) || m.signum() == <span class="number">0</span>) <span class="keyword">return</span> exports.BigInteger.ZERO;
+  <span class="keyword">var</span> u = m.clone(), v = <span class="keyword">this</span>.clone();
+  <span class="keyword">var</span> a = nbv(<span class="number">1</span>), b = nbv(<span class="number">0</span>), c = nbv(<span class="number">0</span>), d = nbv(<span class="number">1</span>);
+  <span class="keyword">while</span>(u.signum() != <span class="number">0</span>) {
+    <span class="keyword">while</span>(u.isEven()) {
+      u.rShiftTo(<span class="number">1</span>,u);
+      <span class="keyword">if</span>(ac) {
+        <span class="keyword">if</span>(!a.isEven() || !b.isEven()) { a.addTo(<span class="keyword">this</span>,a); b.subTo(m,b); }
+        a.rShiftTo(<span class="number">1</span>,a);
+      }
+      <span class="keyword">else</span> <span class="keyword">if</span>(!b.isEven()) b.subTo(m,b);
+      b.rShiftTo(<span class="number">1</span>,b);
+    }
+    <span class="keyword">while</span>(v.isEven()) {
+      v.rShiftTo(<span class="number">1</span>,v);
+      <span class="keyword">if</span>(ac) {
+        <span class="keyword">if</span>(!c.isEven() || !d.isEven()) { c.addTo(<span class="keyword">this</span>,c); d.subTo(m,d); }
+        c.rShiftTo(<span class="number">1</span>,c);
+      }
+      <span class="keyword">else</span> <span class="keyword">if</span>(!d.isEven()) d.subTo(m,d);
+      d.rShiftTo(<span class="number">1</span>,d);
+    }
+    <span class="keyword">if</span>(u.compareTo(v) &gt;= <span class="number">0</span>) {
+      u.subTo(v,u);
+      <span class="keyword">if</span>(ac) a.subTo(c,a);
+      b.subTo(d,b);
+    }
+    <span class="keyword">else</span> {
+      v.subTo(u,v);
+      <span class="keyword">if</span>(ac) c.subTo(a,c);
+      d.subTo(b,d);
+    }
+  }
+  <span class="keyword">if</span>(v.compareTo(exports.BigInteger.ONE) != <span class="number">0</span>) <span class="keyword">return</span> exports.BigInteger.ZERO;
+  <span class="keyword">if</span>(d.compareTo(m) &gt;= <span class="number">0</span>) <span class="keyword">return</span> d.subtract(m);
+  <span class="keyword">if</span>(d.signum() &lt; <span class="number">0</span>) d.addTo(m,d); <span class="keyword">else</span> <span class="keyword">return</span> d;
+  <span class="keyword">if</span>(d.signum() &lt; <span class="number">0</span>) <span class="keyword">return</span> d.add(m); <span class="keyword">else</span> <span class="keyword">return</span> d;
+}
+
+<span class="keyword">var</span> lowprimes = [<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">7</span>,<span class="number">11</span>,<span class="number">13</span>,<span class="number">17</span>,<span class="number">19</span>,<span class="number">23</span>,<span class="number">29</span>,<span class="number">31</span>,<span class="number">37</span>,<span class="number">41</span>,<span class="number">43</span>,<span class="number">47</span>,<span class="number">53</span>,<span class="number">59</span>,<span class="number">61</span>,<span class="number">67</span>,<span class="number">71</span>,<span class="number">73</span>,<span class="number">79</span>,<span class="number">83</span>,<span class="number">89</span>,<span class="number">97</span>,<span class="number">101</span>,<span class="number">103</span>,<span class="number">107</span>,<span class="number">109</span>,<span class="number">113</span>,<span class="number">127</span>,<span class="number">131</span>,<span class="number">137</span>,<span class="number">139</span>,<span class="number">149</span>,<span class="number">151</span>,<span class="number">157</span>,<span class="number">163</span>,<span class="number">167</span>,<span class="number">173</span>,<span class="number">179</span>,<span class="number">181</span>,<span class="number">191</span>,<span class="number">193</span>,<span class="number">197</span>,<span class="number">199</span>,<span class="number">211</span>,<span class="number">223</span>,<span class="number">227</span>,<span class="number">229</span>,<span class="number">233</span>,<span class="number">239</span>,<span class="number">241</span>,<span class="number">251</span>,<span class="number">257</span>,<span class="number">263</span>,<span class="number">269</span>,<span class="number">271</span>,<span class="number">277</span>,<span class="number">281</span>,<span class="number">283</span>,<span class="number">293</span>,<span class="number">307</span>,<span class="number">311</span>,<span class="number">313</span>,<span class="number">317</span>,<span class="number">331</span>,<span class="number">337</span>,<span class="number">347</span>,<span class="number">349</span>,<span class="number">353</span>,<span class="number">359</span>,<span class="number">367</span>,<span class="number">373</span>,<span class="number">379</span>,<span class="number">383</span>,<span class="number">389</span>,<span class="number">397</span>,<span class="number">401</span>,<span class="number">409</span>,<span class="number">419</span>,<span class="number">421</span>,<span class="number">431</span>,<span class="number">433</span>,<span class="number">439</span>,<span class="number">443</span>,<span class="number">449</span>,<span class="number">457</span>,<span class="number">461</span>,<span class="number">463</span>,<span class="number">467</span>,<span class="number">479</span>,<span class="number">487</span>,<span class="number">491</span>,<span class="number">499</span>,<span class="number">503</span>,<span class="number">509</span>,<span class="number">521</span>,<span class="number">523</span>,<span class="number">541</span>,<span class="number">547</span>,<span class="number">557</span>,<span class="number">563</span>,<span class="number">569</span>,<span class="number">571</span>,<span class="number">577</span>,<span class="number">587</span>,<span class="number">593</span>,<span class="number">599</span>,<span class="number">601</span>,<span class="number">607</span>,<span class="number">613</span>,<span class="number">617</span>,<span class="number">619</span>,<span class="number">631</span>,<span class="number">641</span>,<span class="number">643</span>,<span class="number">647</span>,<span class="number">653</span>,<span class="number">659</span>,<span class="number">661</span>,<span class="number">673</span>,<span class="number">677</span>,<span class="number">683</span>,<span class="number">691</span>,<span class="number">701</span>,<span class="number">709</span>,<span class="number">719</span>,<span class="number">727</span>,<span class="number">733</span>,<span class="number">739</span>,<span class="number">743</span>,<span class="number">751</span>,<span class="number">757</span>,<span class="number">761</span>,<span class="number">769</span>,<span class="number">773</span>,<span class="number">787</span>,<span class="number">797</span>,<span class="number">809</span>,<span class="number">811</span>,<span class="number">821</span>,<span class="number">823</span>,<span class="number">827</span>,<span class="number">829</span>,<span class="number">839</span>,<span class="number">853</span>,<span class="number">857</span>,<span class="number">859</span>,<span class="number">863</span>,<span class="number">877</span>,<span class="number">881</span>,<span class="number">883</span>,<span class="number">887</span>,<span class="number">907</span>,<span class="number">911</span>,<span class="number">919</span>,<span class="number">929</span>,<span class="number">937</span>,<span class="number">941</span>,<span class="number">947</span>,<span class="number">953</span>,<span class="number">967</span>,<span class="number">971</span>,<span class="number">977</span>,<span class="number">983</span>,<span class="number">991</span>,<span class="number">997</span>];
+<span class="keyword">var</span> lplim = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">26)</span>/<span class="attribute">lowprimes</span>[<span class="attribute">lowprimes.length-1</span>];
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-104">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-104">&#182;</a>
+              </div>
+              <p>(public) test primality with certainty &gt;= 1-.5^t</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnIsProbablePrime</span><span class="params">(t)</span> {</span>
+  <span class="keyword">var</span> i, x = <span class="keyword">this</span>.abs();
+  <span class="keyword">if</span>(x.t == <span class="number">1</span> &amp;&amp; x[<span class="number">0</span>] &lt;= lowprimes[lowprimes.length-<span class="number">1</span>]) {
+    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; lowprimes.length; ++i)
+      <span class="keyword">if</span>(x[<span class="number">0</span>] == lowprimes[i]) <span class="keyword">return</span> <span class="literal">true</span>;
+    <span class="keyword">return</span> <span class="literal">false</span>;
+  }
+  <span class="keyword">if</span>(x.isEven()) <span class="keyword">return</span> <span class="literal">false</span>;
+  i = <span class="number">1</span>;
+  <span class="keyword">while</span>(i &lt; lowprimes.length) {
+    <span class="keyword">var</span> m = lowprimes[i], j = i+<span class="number">1</span>;
+    <span class="keyword">while</span>(j &lt; lowprimes.length &amp;&amp; m &lt; lplim) m *= lowprimes[j++];
+    m = x.modInt(m);
+    <span class="keyword">while</span>(i &lt; j) <span class="keyword">if</span>(m%lowprimes[i++] == <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;
+  }
+  <span class="keyword">return</span> x.millerRabin(t);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-105">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-105">&#182;</a>
+              </div>
+              <p>(protected) true if probably prime (HAC 4.24, Miller-Rabin)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpMillerRabin</span><span class="params">(t)</span> {</span>
+  <span class="keyword">var</span> n1 = <span class="keyword">this</span>.subtract(exports.BigInteger.ONE);
+  <span class="keyword">var</span> k = n1.getLowestSetBit();
+  <span class="keyword">if</span>(k &lt;= <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;
+  <span class="keyword">var</span> r = n1.shiftRight(k);
+  t = (t+<span class="number">1</span>)&gt;&gt;<span class="number">1</span>;
+  <span class="keyword">if</span>(t &gt; lowprimes.length) t = lowprimes.length;
+  <span class="keyword">var</span> a = nbi();
+  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; t; ++i) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-106">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-106">&#182;</a>
+              </div>
+              <p>Pick bases at random, instead of starting at 2</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
+    <span class="keyword">var</span> y = a.modPow(r,<span class="keyword">this</span>);
+    <span class="keyword">if</span>(y.compareTo(exports.BigInteger.ONE) != <span class="number">0</span> &amp;&amp; y.compareTo(n1) != <span class="number">0</span>) {
+      <span class="keyword">var</span> j = <span class="number">1</span>;
+      <span class="keyword">while</span>(j++ <span class="xml"><span class="tag">&lt; <span class="attribute">k</span> &amp;&amp; <span class="attribute">y.compareTo</span>(<span class="attribute">n1</span>) != <span class="attribute">0</span>) {
+        <span class="attribute">y</span> = <span class="attribute">y.modPowInt</span>(<span class="attribute">2</span>,<span class="attribute">this</span>);
+        <span class="attribute">if</span>(<span class="attribute">y.compareTo</span>(<span class="attribute">exports.BigInteger.ONE</span>) =<span class="value">=</span> <span class="attribute">0</span>) <span class="attribute">return</span> <span class="attribute">false</span>;
+      }
+      <span class="attribute">if</span>(<span class="attribute">y.compareTo</span>(<span class="attribute">n1</span>) != <span class="attribute">0</span>) <span class="attribute">return</span> <span class="attribute">false</span>;
+    }
+  }
+  <span class="attribute">return</span> <span class="attribute">true</span>;
+}
+
+</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-107">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-107">&#182;</a>
+              </div>
+              <p>protected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.prototype.chunkSize = bnpChunkSize;
+exports.BigInteger.prototype.toRadix = bnpToRadix;
+exports.BigInteger.prototype.fromRadix = bnpFromRadix;
+exports.BigInteger.prototype.fromNumber = bnpFromNumber;
+exports.BigInteger.prototype.bitwiseTo = bnpBitwiseTo;
+exports.BigInteger.prototype.changeBit = bnpChangeBit;
+exports.BigInteger.prototype.addTo = bnpAddTo;
+exports.BigInteger.prototype.dMultiply = bnpDMultiply;
+exports.BigInteger.prototype.dAddOffset = bnpDAddOffset;
+exports.BigInteger.prototype.multiplyLowerTo = bnpMultiplyLowerTo;
+exports.BigInteger.prototype.multiplyUpperTo = bnpMultiplyUpperTo;
+exports.BigInteger.prototype.modInt = bnpModInt;
+exports.BigInteger.prototype.millerRabin = bnpMillerRabin;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-108">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-108">&#182;</a>
+              </div>
+              <p>public</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.prototype.clone = bnClone;
+exports.BigInteger.prototype.intValue = bnIntValue;
+exports.BigInteger.prototype.byteValue = bnByteValue;
+exports.BigInteger.prototype.shortValue = bnShortValue;
+exports.BigInteger.prototype.signum = bnSigNum;
+exports.BigInteger.prototype.toByteArray = bnToByteArray;
+exports.BigInteger.prototype.equals = bnEquals;
+exports.BigInteger.prototype.min = bnMin;
+exports.BigInteger.prototype.max = bnMax;
+exports.BigInteger.prototype.and = bnAnd;
+exports.BigInteger.prototype.or = bnOr;
+exports.BigInteger.prototype.xor = bnXor;
+exports.BigInteger.prototype.andNot = bnAndNot;
+exports.BigInteger.prototype.not = bnNot;
+exports.BigInteger.prototype.shiftLeft = bnShiftLeft;
+exports.BigInteger.prototype.shiftRight = bnShiftRight;
+exports.BigInteger.prototype.getLowestSetBit = bnGetLowestSetBit;
+exports.BigInteger.prototype.bitCount = bnBitCount;
+exports.BigInteger.prototype.testBit = bnTestBit;
+exports.BigInteger.prototype.setBit = bnSetBit;
+exports.BigInteger.prototype.clearBit = bnClearBit;
+exports.BigInteger.prototype.flipBit = bnFlipBit;
+exports.BigInteger.prototype.add = bnAdd;
+exports.BigInteger.prototype.subtract = bnSubtract;
+exports.BigInteger.prototype.multiply = bnMultiply;
+exports.BigInteger.prototype.divide = bnDivide;
+exports.BigInteger.prototype.remainder = bnRemainder;
+exports.BigInteger.prototype.divideAndRemainder = bnDivideAndRemainder;
+exports.BigInteger.prototype.modPow = bnModPow;
+exports.BigInteger.prototype.modInverse = bnModInverse;
+exports.BigInteger.prototype.pow = bnPow;
+exports.BigInteger.prototype.gcd = bnGCD;
+exports.BigInteger.prototype.isProbablePrime = bnIsProbablePrime;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-109">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-109">&#182;</a>
+              </div>
+              <p>JSBN-specific extension</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.BigInteger.prototype.square = bnSquare;
+
+<span class="comment">/*
+ *
+ * SHITPATCH
+ *
+ */</span>
+<span class="comment">/**
+ * Returns a byte array representation of the big integer.
+ *
+ * This returns the absolute of the contained value in big endian
+ * form. A value of zero results in an empty array.
+ */</span>
+BigInteger.prototype.toByteArrayUnsigned = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+  <span class="keyword">var</span> ba = <span class="keyword">this</span>.abs().toByteArray();
+  <span class="keyword">if</span> (ba.length) {
+    <span class="keyword">if</span> (ba[<span class="number">0</span>] == <span class="number">0</span>) {
+      ba = ba.slice(<span class="number">1</span>);
+    }
+    <span class="keyword">return</span> ba.map(<span class="function"><span class="keyword">function</span> <span class="params">(v)</span> {</span>
+      <span class="keyword">return</span> (v &lt; <span class="number">0</span>) ? v + <span class="number">256</span> : v;
+    });
+  } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-110">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-110">&#182;</a>
+              </div>
+              <p>Empty array, nothing to do</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> ba;
+  }
+};
+
+<span class="comment">/**
+ * Turns a byte array into a big integer.
+ *
+ * This function will interpret a byte array as a big integer in big
+ * endian notation and ignore leading zeros.
+ */</span>
+exports.BigInteger.fromByteArrayUnsigned = <span class="function"><span class="keyword">function</span> <span class="params">(ba)</span> {</span>
+  <span class="keyword">if</span> (!ba.length) {
+    <span class="keyword">return</span> <span class="keyword">new</span> exports.BigInteger(<span class="number">0</span>);
+  } <span class="keyword">else</span> <span class="keyword">if</span> (ba[<span class="number">0</span>] &amp; <span class="number">0x80</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-111">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-111">&#182;</a>
+              </div>
+              <p>Prepend a zero so the exports.BigInteger class doesn&#39;t mistake this
+for a negative integer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> <span class="keyword">new</span> exports.BigInteger([<span class="number">0</span>].concat(ba));
+  } <span class="keyword">else</span> {
+    <span class="keyword">return</span> <span class="keyword">new</span> exports.BigInteger(ba);
+  }
+};
+
+<span class="comment">/**
+ * Converts big integer to signed byte representation.
+ *
+ * The format for this value uses a the most significant bit as a sign
+ * bit. If the most significant bit is already occupied by the
+ * absolute value, an extra byte is prepended and the sign bit is set
+ * there.
+ *
+ * Examples:
+ *
+ *      0 =&gt;     0x00
+ *      1 =&gt;     0x01
+ *     -1 =&gt;     0x81
+ *    127 =&gt;     0x7f
+ *   -127 =&gt;     0xff
+ *    128 =&gt;   0x0080
+ *   -128 =&gt;   0x8080
+ *    255 =&gt;   0x00ff
+ *   -255 =&gt;   0x80ff
+ *  16300 =&gt;   0x3fac
+ * -16300 =&gt;   0xbfac
+ *  62300 =&gt; 0x00f35c
+ * -62300 =&gt; 0x80f35c
+ */</span>
+exports.BigInteger.prototype.toByteArraySigned = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+  <span class="keyword">var</span> val = <span class="keyword">this</span>.abs().toByteArrayUnsigned();
+  <span class="keyword">var</span> neg = <span class="keyword">this</span>.compareTo(exports.BigInteger.ZERO) &lt; <span class="number">0</span>;
+
+  <span class="keyword">if</span> (neg) {
+    <span class="keyword">if</span> (val[<span class="number">0</span>] &amp; <span class="number">0x80</span>) {
+      val.unshift(<span class="number">0x80</span>);
+    } <span class="keyword">else</span> {
+      val[<span class="number">0</span>] |= <span class="number">0x80</span>;
+    }
+  } <span class="keyword">else</span> {
+    <span class="keyword">if</span> (val[<span class="number">0</span>] &amp; <span class="number">0x80</span>) {
+      val.unshift(<span class="number">0x00</span>);
+    }
+  }
+
+  <span class="keyword">return</span> val;
+};
+
+<span class="comment">/**
+ * Parse a signed big integer byte representation.
+ *
+ * For details on the format please see exports.BigInteger.toByteArraySigned.
+ */</span>
+exports.BigInteger.fromByteArraySigned = <span class="function"><span class="keyword">function</span> <span class="params">(ba)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-112">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-112">&#182;</a>
+              </div>
+              <p>Check for negative value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (ba[<span class="number">0</span>] &amp; <span class="number">0x80</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-113">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-113">&#182;</a>
+              </div>
+              <p>Remove sign bit</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    ba[<span class="number">0</span>] &amp;= <span class="number">0x7f</span>;
+
+    <span class="keyword">return</span> exports.BigInteger.fromByteArrayUnsigned(ba).negate();
+  } <span class="keyword">else</span> {
+    <span class="keyword">return</span> exports.BigInteger.fromByteArrayUnsigned(ba);
+  }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-114">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-114">&#182;</a>
+              </div>
+              <p>exports.BigInteger interfaces not implemented in jsbn:</p>
+<p>exports.BigInteger(int signum, byte[] magnitude)
+double doubleValue()
+float floatValue()
+int hashCode()
+long longValue()
+static exports.BigInteger valueOf(long val)</p>
+
+            </div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

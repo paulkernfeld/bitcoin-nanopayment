@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>base58.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="base58.html">
+                base58.js
+              </a>
+            
+              
+              <a class="source" href="bitcoin-nanopayment.html">
+                bitcoin-nanopayment.js
+              </a>
+            
+              
+              <a class="source" href="demo.html">
+                demo.js
+              </a>
+            
+              
+              <a class="source" href="jsbn-patched.html">
+                jsbn-patched.js
+              </a>
+            
+              
+              <a class="source" href="script.html">
+                script.js
+              </a>
+            
+              
+              <a class="source" href="test-base58.html">
+                test-base58.js
+              </a>
+            
+              
+              <a class="source" href="test-jsbn.html">
+                test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment.html">
+                test-payment.js
+              </a>
+            
+              
+              <a class="source" href="test-random.html">
+                test-random.js
+              </a>
+            
+              
+              <a class="source" href="util.html">
+                util.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>base58.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Internal imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>External imports</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> crypto = require(<span class="string">'crypto'</span>);
+<span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);
+<span class="keyword">var</span> buffertools = require(<span class="string">'buffertools'</span>);
+
+<span class="keyword">var</span> alphabet = <span class="string">"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"</span>;
+<span class="keyword">var</span> validRegex = <span class="regexp">/^[1-9A-HJ-NP-Za-km-z]+$/</span>;
+<span class="keyword">var</span> base = <span class="keyword">new</span> BigInteger();
+base.fromInt(<span class="number">58</span>);
+
+
+<span class="comment">/**
+ * Convert a byte array to a base58-encoded string.
+ *
+ * Written by Mike Hearn for BitcoinJ.
+ *   Copyright (c) 2011 Google Inc.
+ *
+ * Ported to JavaScript by Stefan Thomas.
+ *
+ * Edited slightly by Paul Kernfeld
+ */</span>
+exports.encode = <span class="function"><span class="keyword">function</span> <span class="params">(input)</span> {</span>
+  <span class="keyword">var</span> bi = BigInteger.fromByteArrayUnsigned(input);
+  <span class="keyword">var</span> chars = [];
+
+  <span class="keyword">while</span> (bi.compareTo(base) &gt;= <span class="number">0</span>) {
+    <span class="keyword">var</span> mod = bi.mod(base);
+    chars.unshift(alphabet[mod.intValue()]);
+    bi = bi.subtract(mod).divide(base);
+  }
+  chars.unshift(alphabet[bi.intValue()]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Convert leading zeros too.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; input.length; i++) {
+    <span class="keyword">if</span> (input[i] == <span class="number">0x00</span>) {
+      chars.unshift(alphabet[<span class="number">0</span>]);
+    } <span class="keyword">else</span> <span class="keyword">break</span>;
+  }
+
+  <span class="keyword">return</span> chars.join(<span class="string">''</span>);
+};
+
+<span class="comment">/**
+ * Convert a base58-encoded string to a byte array.
+ *
+ * Written by Mike Hearn for BitcoinJ.
+ *   Copyright (c) 2011 Google Inc.
+ *
+ * Ported to JavaScript by Stefan Thomas.
+ *
+ * Edited slightly by Paul Kernfeld
+ */</span>
+exports.decode = <span class="function"><span class="keyword">function</span> <span class="params">(input)</span> {</span>
+  <span class="keyword">var</span> bi = <span class="keyword">new</span> BigInteger();
+  bi.fromInt(<span class="number">0</span>);
+  <span class="keyword">var</span> leadingZerosNum = <span class="number">0</span>;
+  <span class="keyword">for</span> (<span class="keyword">var</span> i = input.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) {
+    <span class="keyword">var</span> alphaIndex = alphabet.indexOf(input[i]);
+    <span class="keyword">if</span> (alphaIndex &lt; <span class="number">0</span>) {
+      <span class="keyword">throw</span> <span class="string">"Invalid character"</span>;
+    }
+    <span class="keyword">var</span> ai = <span class="keyword">new</span> BigInteger();
+    ai.fromInt(alphaIndex);
+    bi = bi.add(ai.multiply(base.pow(input.length - <span class="number">1</span> -i)));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>This counts leading zero bytes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (input[i] == <span class="string">"1"</span>) leadingZerosNum++;
+    <span class="keyword">else</span> leadingZerosNum = <span class="number">0</span>;
+  }
+  <span class="keyword">var</span> bytes = bi.toByteArrayUnsigned();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Add leading zeros</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">while</span> (leadingZerosNum-- &gt; <span class="number">0</span>) bytes.unshift(<span class="number">0</span>);
+  
+  <span class="keyword">return</span> bytes;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>The input should be a buffer and a version byte
+<a href="https://en.bitcoin.it/wiki/Base58Check_encoding">https://en.bitcoin.it/wiki/Base58Check_encoding</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.encodeChecked = <span class="keyword">function</span>(input, version) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>todo: maybe we implement this...</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Copyright 2013 Paul Kernfeld
+Return (hex, version byte)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.decodeChecked = <span class="keyword">function</span>(input) {
+  <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(exports.decode(input));
+  assert(
+    buffer.length &gt; <span class="number">5</span>,
+    input + <span class="string">' is too short to be a Base58-checked string'</span>
+  );
+  <span class="keyword">var</span> withoutChecksum = buffer.slice(<span class="number">0</span>, -<span class="number">4</span>);
+  <span class="keyword">var</span> hash1 = crypto.createHash(<span class="string">'sha256'</span>);
+  hash1.update(withoutChecksum);
+  <span class="keyword">var</span> hash2 = crypto.createHash(<span class="string">'sha256'</span>);
+  hash2.update(hash1.digest());
+  <span class="keyword">var</span> checksumExpected = hash2.digest().slice(<span class="number">0</span>, <span class="number">4</span>);
+  <span class="keyword">var</span> checksumActual = buffer.slice(-<span class="number">4</span>);
+  assert(
+    checksumExpected.equals(checksumActual),
+    <span class="string">'Checksum was '</span> + checksumActual.toString(<span class="string">'hex'</span>) +
+      <span class="string">', should be '</span> + checksumExpected.toString(<span class="string">'hex'</span>)
+  );
+  <span class="keyword">return</span> {
+    payload: withoutChecksum.slice(<span class="number">1</span>),
+    version: withoutChecksum[<span class="number">0</span>]
+  };
+};</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
