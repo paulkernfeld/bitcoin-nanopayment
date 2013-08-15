@@ -9,8 +9,8 @@
     "url": "http://www.paulkernfeld.com"
   },
   "files": ["lib"],
-  "main": "lib/payment-btc",
-  "repository": { "type": "git", "url": "" },
+  "main": "lib/bitcoin-nanopayment",
+  "repository": { "type": "git", "url": "http://github.com/hi-entropy/bitcoin-nanopayments.git" },
   "dependencies": {
     "async": "latest",
     "bitcoin": "latest",

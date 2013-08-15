@@ -1,10 +1,10 @@
 For Developers
 ==============
-This section is for developers interested in improving or porting this library.
+This document is for developers interested in improving or porting this library.
 
 Protocol
 --------
-Note that this protocol does not specify a transport for the data; the application is responsible for sending and receiving information between the two parties.
+This is a protocol for sending a fair probabilistic payment from one party to another.  Note that this protocol does not specify a transport for the data; the application is responsible for sending and receiving information between the two parties.
 
 Alice pays Bob as follows:
 
@@ -12,7 +12,7 @@ Alice pays Bob as follows:
 Bob creates a transaction to Alice, for the amount of money that she will pay him.  He stores it locally, but does not send it out to the network.  He randomly chooses a range of consecutive numbers that includes the transaction ID.  Note that the size of the range is equal to the inverse of the probability that the voucher will be cashable.  Bob sends a serialized specification of the range (the "target") to Alice.
 
 #### Serialized target
-Everything's just ASCII-encoded, separated by dashes.
+Everything's just ASCII-encoded, separated by dashes.  The individual data items are.
 
 * amount to send, in Satoshis - integer
 * inverse probability of success - integer
@@ -53,12 +53,3 @@ You must also create `config/test-accounts.json` like the following:
 These files are not added to git, to avoid accidental sharing.
 
 The source and destination addresses must each have at least 0.01 BTC for the test to run.
-
-
-Future Goals
-------------
-* Let users pay without requiring Bitcoin-Qt
-* Listen for external payments into the paying address
-* Implement this protocol in other languages
-* Detect double spending
-* Build calculation tools to help users balance transaction fees vs. uncertainty

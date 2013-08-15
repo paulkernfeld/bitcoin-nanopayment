@@ -1,55 +1,57 @@
-<---
-This file is part of bitcoin-nanopayment
-
-bitcoin-nanopayment is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-bitcoin-nanopayment is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with bitcoin-nanopayment.  If not, see <http://www.gnu.org/licenses/>.
---->
-
-
-
 bitcoin-nanopayment
 ===================
 Copyright 2013 Paul Kernfeld.  This software is released under the [GNU GPL v3][gpl].
 
-bitcoin-nanopayment is a node.js library that allows users to send probabilistc nanopayments to others.  It uses RPC calls to Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
+bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
 
+### What are probabilistic nanopayments?
+Alice wants to pay Bob half a cent.  In order to pay Bob the equivalent of half a cent, she first flips a coin.  If it's heads, she pays him one cent.  If it's tails, she pays him nothing.  In the long term, the luck evens out.
 
 Probabilistic Nanopayments
 --------------------------
-
-### What are probabilistic nanopayments?
-Alice needs to pay Bob half a cent.  In order to pay Bob the equivalent of half a cent, she flips a coin.  If it's heads, she pays him one cent.  If it's tails, she pays him nothing.  In the long term, these payments even out.
-
-This library lets users create "vouchers," which are bitcoin transactions that have a known probability of succeeding.  Instead of paying 1 mBTC, the user can send a voucher that has a 10% chance of being worth 10 mBTC, and 90% of the time doesn't do anything.
+### What does this library do?
+bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known probability of succeeding.
 
 ### Who is this for?
-This protocol is useful for entities that need to send or receive small or rapid Bitcoin payments.
+This protocol is useful for entities that need to send or receive Bitcoin payments that are small or rapid.  Although a simple CLI is provided, this will probably be more useful for automated payments by applications.
 
 ### Small payments
-Sending extremely small Bitcoin payments is impractical, because each transaction takes up space in the blockchain.  Currently, the reference implementation discourages this by charging [transaction fees][fees] for transactions smaller than 0.01 BTC and refusing to relay transactions of less than 5430 Satoshis ("dust") by default.
+Sending extremely small Bitcoin payments is impractical, because each transaction takes up space in the blockchain.  Currently, the reference implementation discourages nanopayments by charging [transaction fees][fees] for transactions smaller than 0.01 BTC and refusing to relay transactions of less than 5430 Satoshis ("dust") by default.
 
 This protocol even lets users pay each other quantities less than 1 Satoshi.
 
 This protocol is not to be confused with a [Bitcoin micropayments channel][micropayments], which allows two users to group many small transactions between themselves into a larger transaction.
 
 ### Rapid payments
-An entity that sends rapid payments needs to have a lot of money in its account.  Otherwise, it must wait until each new block to send another transaction.  Probabilistic nanopayments avoid this problem because they can pay the same amount of money with fewer transactions.
+An entity that sends rapid payments needs to have a lot of money in its account.  Otherwise, it must wait between payments so that the recipient of the payments can verify that a double-spend attack is not being committed.  Probabilistic nanopayments avoid this problem because they can pay the same value while sending fewer transactions to the blockchain.
 
 
 Properties
 ----------
-### Double-spending
-This is equally vulnerable to double-spend attacks as ordinary Bitcoin transactions
+### Advantages
+### Of this protocol
+* Neither party needs to trust the other party
+* Neither party can cheat the other party
+* The smallest possible payment is infinitesimal
+* Requires only two network round trips between payer and payee
+* Flexible - can be used with any transport mechanism
+
+### Limitations
+#### Of this protocol
+* The recipient must hold the private key for the account that's being paid to
+* The payee must have a small amount of money to get paid
+* The payee can be DDoS'ed unless he is able to filter out illegitimate payment requests
+* The rate at which the payee can be paid depends on how much money the payee has
+* Payment requires two round trips between the payer and payee
+* Each payment requires two transactions
+
+#### Of this implementation
+* Stores the private key in a plaintext file
+* Requires use of Bitcoin-Qt's RPC functionality
+* Hardcoded to only send transactions for 0.01 BTC
+* Can only send or receive one transaction at a time
+* Hardcoded to use testnet bitcoins
+* Minimum payment is 5.92e-13 Satoshis
 
 ### Asymptotic Guarantees
 For *N* vouchers, each for *x* BTC and being cashable with a probability *p,* the distribution of payments made follows a binomial distribution with parameters *N* and *p,* scaled by *x.*  The scaled distribution has mean *xNp* and variance *x*√(*Np*(1 - *p*)).
@@ -60,29 +62,13 @@ The normal approximation of the binomial distribution is appropriate when *Np* >
 
 The ratio of actual returns to expected returns is a distribution with mean 1 and standard deviation less than 1/√(*Np*).
 
-### Limitations
-#### Of nanopayments
-* This system requires the recipient to hold the private key for the account that's being paid to
-
-#### Of this protocol
-* Payment requires several round trips between the payer and payee
-* The payee must have a small amount of money to get paid
-* The rate at which the payee can be paid depends on how much money the payee has
-* The payee can be DDoS'ed unless he is able to filter out illegitimate payment requests
-* Paying and being paid can't be done simultaneously
-
-#### Of this implementation
-* Requires use of Bitcoin-Qt's RPC functionality
-* This is hardcoded to only send transactions for 0.01 BTC
-* Can only send or receive one transaction at a time
-* Hardcoded to use testnet bitcoins
 
 Setup
 -----
 ### Bitcoin-Qt setup
 In order to use this library, you must install [Bitcoin-Qt][bitcoin-qt] and enable RPC.
 
-Create or modify Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to enable the RPC server.  Set `testnet` to `1` only if you're using the testnet.  Be aware that this lets any program that can read this password have access to your Bitcoin wallet.  *THIS IS A BAD IDEA.*
+Create or modify Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to enable the RPC server.  Set `testnet` to `1` only if you're using the testnet.  Be aware that this lets any program that can read this password have access to your Bitcoin wallet.  **THIS IS A SECURITY RISK.**
 
     testnet=1
 
@@ -99,7 +85,7 @@ Alice pays Bob as follows:
 Bob requests a payment from Alice by calling the `requestPayment` method.  He sends the result of this method (the "target") to Alice.
 
 ### Step 2
-Alice creates a voucher based on the this by calling 'createPayment' and passing in the target.  She sends the voucher to Bob.
+Alice creates a voucher based on the target by calling 'createPayment' and passing in the target.  She sends the voucher she just created to Bob.
 
 ### Step 3
 Bob calls 'cashPayment' on the voucher he just received from Alice.  The result of this method tells him whether the payment was valid, and whether or not it was cashable.
