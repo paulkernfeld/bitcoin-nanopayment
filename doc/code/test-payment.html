@@ -138,7 +138,8 @@
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);
 <span class="keyword">var</span> fs = require(<span class="string">'fs'</span>);
 <span class="keyword">var</span> bitcoin = require(<span class="string">'bitcoin'</span>);
-<span class="keyword">var</span> async = require(<span class="string">'async'</span>);</pre></div></div>
+<span class="keyword">var</span> async = require(<span class="string">'async'</span>);
+<span class="keyword">var</span> util = require(<span class="string">'util'</span>);</pre></div></div>
             
         </li>
         
@@ -219,25 +220,19 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Initialize each account</p>
+              <p>The recipient requests the payment</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
-      sourceAccount.initialize(<span class="keyword">function</span>(err) {
-        assert.ifError(err, <span class="string">'Error initializing source account'</span>);
-        console.log(<span class="string">'Source account initialized.'</span>);
-        cb(err);
-      });
-    },
+      destinationAccount.requestVoucher(
+        <span class="number">1</span>,
+        accountConfig.sourceAddress,
+        <span class="keyword">function</span>(err, targetSerialized) {
+          assert(!err, util.inspect(err));
+          console.log(<span class="string">'Voucher requested.'</span>);
 
-    <span class="keyword">function</span>(cb) {
-      destinationAccount.initialize(<span class="keyword">function</span>(err) {
-        assert.ifError(err, <span class="string">'Error initializing destination account'</span>);
-        console.log(<span class="string">'Destination account initialized.'</span>);
-        cb(err);
-      });
-    },</pre></div></div>
+          <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
             
         </li>
         
@@ -248,19 +243,14 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>The recipient requests the payment</p>
+              <p>Make sure the length of the range is 1</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
-      destinationAccount.requestVoucher(
-        <span class="number">1</span>,
-        accountConfig.sourceAddress,
-        <span class="keyword">function</span>(err, targetSerialized) {
-          assert.ifError(err, <span class="string">'Error requesting voucher'</span>);
-          console.log(<span class="string">'Voucher requested.'</span>);
-
-          <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          assert.equal(target.length, <span class="number">1</span>, <span class="string">'Range length must equal 1'</span>);
+          cb(err, targetSerialized);
+        });
+    },</pre></div></div>
             
         </li>
         
@@ -271,13 +261,20 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Make sure the length of the range is 1</p>
+              <p>The payer creates the payment voucher based on the request</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          assert.equal(target.length, <span class="number">1</span>);
-          cb(err, targetSerialized);
-        });
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(range, cb) {
+      sourceAccount.createVoucher(
+        destinationAddress,
+        range,
+        <span class="keyword">function</span>(err, transactionHex) {
+          assert(!err, util.inspect(err));
+          console.log(<span class="string">'Voucher created.'</span>);
+          cb(err, transactionHex);
+        }
+      );
     },</pre></div></div>
             
         </li>
@@ -289,39 +286,14 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>The payer creates the payment voucher based on the request</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(range, cb) {
-      sourceAccount.createVoucher(
-        destinationAddress,
-        range,
-        <span class="keyword">function</span>(err, transactionHex) {
-          assert.ifError(err, <span class="string">'Error creating voucher'</span>);
-          console.log(<span class="string">'Voucher created.'</span>);
-          cb(err, transactionHex);
-        }
-      );
-    },</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
               <p>The recipient cashes the payment voucher in</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(transactionHex, cb) {
       destinationAccount.cashVoucher(transactionHex, <span class="keyword">function</span>(err, cashed) {
-        assert.ifError(err, <span class="string">'Error cashing voucher'</span>);
-        assert(cashed);
+        assert(!err, util.inspect(err));
+        assert(cashed, <span class="string">"The voucher wasn't cashable?"</span>);
         console.log(<span class="string">'Transaction cashed.'</span>);
       });
     }
