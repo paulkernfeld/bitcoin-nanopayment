@@ -29,6 +29,17 @@ Alice creates a transaction from herself to Bob, using a random number in the ra
 ### Step 3
 Bob checks whether Alice's transaction was valid.  If Alice's guess matches Bob's transaction ID, Bob can cash the transaction in by broadcasting it to the network.  Otherwise, the transaction is worthless and Bob throws it away.
 
+Potential Attacks
+-----------------
+### DDOS'ing a payee
+Since the payee can only receive a limited number of payments at a time, a network of payers could ask the payee to generate targets, but then never actually use the targets.
+
+### Double-spending
+This system is no more or less resistant to double-spending than ordinary Bitcoin payments of the same frequency.
+
+### Generating transaction ID's
+If the payee can generate many transaction ID's that are near to each other, he can create payments that are likely to be valid.  TODO: quantify the cost/benefit of doing this.
+
 
 Tests
 -----
@@ -53,3 +64,5 @@ You must also create `config/test-accounts.json` like the following:
 These files are not added to git, to avoid accidental sharing.
 
 The source and destination addresses must each have at least 0.01 BTC for the test to run.
+
+[mean-minimum-distance][http://mathoverflow.net/questions/1294/mean-minimum-distance-for-n-random-points-on-a-one-dimensional-line]

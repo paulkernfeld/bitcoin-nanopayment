@@ -10,7 +10,12 @@ Alice wants to pay Bob half a cent.  In order to pay Bob the equivalent of half 
 Probabilistic Nanopayments
 --------------------------
 ### What does this library do?
-bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known probability of succeeding.
+bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known and verifiable probability of succeeding.
+
+### How does this Library work?
+This library lets users request, generate, and cash in vouchers that succeed with probability *1 / K*, where *K ≥ 1* is an integer.  Otherwise, with probability *(K - 1) / K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability *1 / K*, the monetary value of the voucher is *x / K*.  This library generates the vouchers, and the user is responsible for sending them between users.
+
+Please see [docs/developers.md][docs/developers.md] for more details.
 
 ### Who is this for?
 This protocol is useful for entities that need to send or receive Bitcoin payments that are small or rapid.  Although a simple CLI is provided, this will probably be more useful for automated payments by applications.
@@ -25,30 +30,30 @@ This protocol is not to be confused with a [Bitcoin micropayments channel][micro
 ### Rapid payments
 An entity that sends rapid payments needs to have a lot of money in its account.  Otherwise, it must wait between payments so that the recipient of the payments can verify that a double-spend attack is not being committed.  Probabilistic nanopayments avoid this problem because they can pay the same value while sending fewer transactions to the blockchain.
 
-
 Properties
 ----------
 ### Advantages
 ### Of this protocol
 * Neither party needs to trust the other party
 * Neither party can cheat the other party
+* Can be used with any transport mechanism
 * The smallest possible payment is infinitesimal
 * Requires only two network round trips between payer and payee
-* Flexible - can be used with any transport mechanism
 
 ### Limitations
 #### Of this protocol
 * The recipient must hold the private key for the account that's being paid to
 * The payee must have a small amount of money to get paid
 * The payee can be DDoS'ed unless he is able to filter out illegitimate payment requests
+* Each payment requires two transactions (hence double the transaction fee)
 * The rate at which the payee can be paid depends on how much money the payee has
 * Payment requires two round trips between the payer and payee
-* Each payment requires two transactions
+* Only supports payments with probability *1/K*, where *K* is an integer
 
 #### Of this implementation
 * Stores the private key in a plaintext file
 * Requires use of Bitcoin-Qt's RPC functionality
-* Hardcoded to only send transactions for 0.01 BTC
+* Hardcoded to only send transactions for 0.01 BTC (smallest no-fee tx as of August 2013)
 * Can only send or receive one transaction at a time
 * Hardcoded to use testnet bitcoins
 * Minimum payment is 5.92e-13 Satoshis
