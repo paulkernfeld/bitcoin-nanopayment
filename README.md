@@ -12,8 +12,8 @@ Probabilistic Nanopayments
 ### What does this library do?
 bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known and verifiable probability of succeeding.
 
-### How does this Library work?
-This library lets users request, generate, and cash in vouchers that succeed with probability *1 / K*, where *K ≥ 1* is an integer.  Otherwise, with probability *(K - 1) / K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability *1 / K*, the monetary value of the voucher is *x / K*.  This library generates the vouchers, and the user is responsible for sending them between users.
+### How does this library work?
+This library lets users request, generate, and cash in vouchers that succeed with probability 1 / *K*, where *K* ≥ 1 is an integer.  Otherwise, with probability (*K* - 1) / *K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability 1 / *K*, the monetary value of the voucher is *x* / *K*.  This library generates the vouchers, and the user is responsible for sending them between users.
 
 Please see [docs/developers.md][docs/developers.md] for more details.
 
@@ -84,16 +84,16 @@ Create or modify Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to enable the 
 
 How to Use
 ----------
-Alice pays Bob as follows:
+Alice can pay Bob as follows:
 
 ### Step 1
-Bob requests a payment from Alice by calling the `requestPayment` method.  He sends the result of this method (the "target") to Alice.
+Bob requests a payment from Alice by calling the `requestVoucher` method.  He sends the result of this method (the "target") to Alice.
 
 ### Step 2
-Alice creates a voucher based on the target by calling 'createPayment' and passing in the target.  She sends the voucher she just created to Bob.
+Alice creates a voucher based on the target by calling `createVoucher` and passing in the target.  She sends the voucher she just created to Bob.
 
 ### Step 3
-Bob calls 'cashPayment' on the voucher he just received from Alice.  The result of this method tells him whether the payment was valid, and whether or not it was cashable.
+Bob calls `cashVoucher` on the voucher he just received from Alice.  The result of this method tells him whether the payment was valid, and whether or not it was cashable.
 
 
 You can simulate this process by running two instances of `demo.js` and sending a voucher from one to the other.
