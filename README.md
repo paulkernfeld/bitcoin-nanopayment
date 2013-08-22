@@ -13,7 +13,7 @@ Probabilistic Nanopayments
 bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known and verifiable probability of succeeding.
 
 ### How does this library work?
-This library lets users request, generate, and cash in vouchers that succeed with probability 1 / *K*, where *K* ≥ 1 is an integer.  Otherwise, with probability (*K* - 1) / *K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability 1 / *K*, the monetary value of the voucher is *x* / *K*.  This library generates the vouchers, and the user is responsible for sending them between users.
+This library lets users request, generate, and cash in vouchers that succeed with probability 1 / *K*, where *K* ≥ 1 is an integer.  Otherwise, with probability ( *K* - 1) / *K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability 1 / *K*, the monetary value of the voucher is *x* / *K*.  This library generates the vouchers, and the user is responsible for sending them between users.
 
 Please see [docs/developers.md][docs/developers.md] for more details.
 
@@ -59,13 +59,13 @@ Properties
 * Minimum payment is 5.92e-13 Satoshis
 
 ### Asymptotic Guarantees
-For *N* vouchers, each for *x* BTC and being cashable with a probability *p,* the distribution of payments made follows a binomial distribution with parameters *N* and *p,* scaled by *x.*  The scaled distribution has mean *xNp* and variance *x*√(*Np*(1 - *p*)).
+For *N* vouchers, each for *x* BTC and being cashable with a probability *p,* the distribution of payments made follows a binomial distribution with parameters *N* and *p,* scaled by *x.*  The scaled distribution has mean *xNp* and variance *x*√( *Np* (1 - *p*)).
 
 The Poisson approximation to the binomial distribution is appropriate when *p* is small and *N* is large. In this case the returns are approximated by a Poisson distribution with parameter *Np*, scaled by *x*.
 
-The normal approximation of the binomial distribution is appropriate when *Np* >> 1.  In this case, the returns are approximated by normal distribution with mean *xNp* and standard deviation *x*√(*Np*).
+The normal approximation of the binomial distribution is appropriate when *Np* >> 1.  In this case, the returns are approximated by normal distribution with mean *xNp* and standard deviation *x*√( *Np* ).
 
-The ratio of actual returns to expected returns is a distribution with mean 1 and standard deviation less than 1/√(*Np*).
+The ratio of actual returns to expected returns is a distribution with mean 1 and standard deviation less than 1/√( *Np* ).
 
 
 Setup
