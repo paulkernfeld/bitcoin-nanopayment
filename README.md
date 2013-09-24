@@ -2,10 +2,12 @@ bitcoin-nanopayment
 ===================
 Copyright 2013 Paul Kernfeld.  This software is released under the [GNU GPL v3][gpl].
 
+The fundamental problem with Bitcoin nanopayments is that making massive numbers of payments would take up too much space on the blockchain. Probabilistic nanopayments are one way to solve this problem without requiring significant computing resources or trust in a centralized system.
+
 bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
 
 ### What are probabilistic nanopayments?
-Alice wants to pay Bob half a cent.  In order to pay Bob the equivalent of half a cent, she first flips a coin.  If it's heads, she pays him one cent.  If it's tails, she pays him nothing.  In the long term, the luck evens out.
+A probabilistic nanopayment is a payment from one party to another that succeeds with a certain probability, and otherwise does nothing. In order for the parties to determine the expected amount that will be paid, they must both know the probability of success, and they should not be able to manipulate that probability.
 
 Probabilistic Nanopayments
 --------------------------
@@ -15,7 +17,7 @@ bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to o
 ### How does this library work?
 This library lets users request, generate, and cash in vouchers that succeed with probability 1 / *K*, where *K* ≥ 1 is an integer.  Otherwise, with probability ( *K* - 1) / *K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability 1 / *K*, the monetary value of the voucher is *x* / *K*.  This library generates the vouchers, and the user is responsible for sending them between users.
 
-Please see [docs/developers.md][docs/developers.md] for more details.
+Please see [docs/developers.md](docs/developers.md) for more details.
 
 ### Who is this for?
 This protocol is useful for entities that need to send or receive Bitcoin payments that are small or rapid.  Although a simple CLI is provided, this will probably be more useful for automated payments by applications.
@@ -36,6 +38,8 @@ Properties
 ### Of this protocol
 * Neither party needs to trust the other party
 * Neither party can cheat the other party
+* Neither party needs to trust a centralized system
+* Does not require significant additional computational resources
 * Can be used with any transport mechanism
 * The smallest possible payment is infinitesimal
 * Requires only two network round trips between payer and payee
