@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>test-random.js</title>
+  <title>rpc-server.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -106,7 +106,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>test-random.js</h1>
+                  <h1>rpc-server.js</h1>
               </div>
           </li>
         
@@ -148,7 +148,8 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> paymentBtc = require(<span class="string">'./util'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> nanopayments = require(<span class="string">'../lib/bitcoin-nanopayment'</span>);
+<span class="keyword">var</span> Account = nanopayments.Account;</pre></div></div>
             
         </li>
         
@@ -163,7 +164,8 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jayson = require(<span class="string">'jayson'</span>);
+<span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
             
         </li>
         
@@ -174,26 +176,98 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Horribly weak visual test for random number generation</p>
+              <p>TODO: comment</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>{
-  <span class="keyword">var</span> testUniformRandom = <span class="keyword">function</span>(n) {
-    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) {
-      <span class="keyword">var</span> random = paymentBtc.cryptoRandom(n);
-      assert(random &gt;= <span class="number">0</span>);
-      assert(random &lt; n);
-      console.log(random)
+            <div class="content"><div class='highlight'><pre>exports.Server = <span class="keyword">function</span>(rpcConfig, address, privateKey, timeout, minConf) {
+
+  <span class="keyword">var</span> serverRunning;
+  <span class="keyword">var</span> accounts = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>create a server</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> server = jayson.server({</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Returns an arbitrary numeric ID for this account</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    createAccount: <span class="keyword">function</span>(rpcConfig, address, privateKey, timeout, minConf, cb) {
+      <span class="keyword">try</span> {
+        accounts += [<span class="keyword">new</span> Account(rpcConfig, address, privateKey, timeout, minConf)];
+      } <span class="keyword">catch</span> (e) {
+        cb(e);
+      }
+      cb(<span class="literal">null</span>, accounts.length - <span class="number">1</span>);
+    },
+
+    requestVoucher: <span class="keyword">function</span>(accountId, inverseProbability, fromAddress, cb) {
+      <span class="keyword">try</span> {
+        accounts[accountId].requestVoucher(inverseProbability, fromAddress, cb);
+      } <span class="keyword">catch</span> (e) {
+        cb(e);
+      }
+    },
+
+    createVoucher: <span class="keyword">function</span>(accountId, destinationAddress, targetSerialized, cb) {
+      <span class="keyword">try</span> {
+        accounts[accountId].createVoucher(destinationAddress, targetSerialized, cb);
+      } <span class="keyword">catch</span> (e) {
+        cb(e);
+      }
+    },
+
+    cashVoucher: <span class="keyword">function</span>(accountId, transactionHex, cb) {
+      <span class="keyword">try</span> {
+        accounts[accountId].cashVoucher(transactionHex, cb);
+      } <span class="keyword">catch</span> (e) {
+        cb(e);
+      }
     }
-  };
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Bind a http interface to the server and let it listen to localhost:3000</p>
 
-  <span class="keyword">var</span> ns = [<span class="number">1</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">256</span>, <span class="number">1000</span>];
-
-  <span class="keyword">for</span> (<span class="keyword">var</span> n <span class="keyword">in</span> ns) {
-    testUniformRandom(ns[n]);
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.listen = <span class="keyword">function</span>() {
+    serverRunning = server.http().listen(<span class="number">3000</span>);
   }
-}</pre></div></div>
+
+  <span class="keyword">this</span>.close = <span class="keyword">function</span>() {
+    serverRunning.close();
+  }
+};</pre></div></div>
             
         </li>
         

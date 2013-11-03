@@ -43,7 +43,7 @@ If the payee can generate many transaction ID's that are near to each other, he 
 
 Tests
 -----
-To run the tests, you'll need to create the file `config/rpc.json` like the following:
+To run the tests, you'll need to create the file `config/bitcoind.json` like the following, to configure the connection to the bitcoind/Bitcoin-Qt 
 
     {
       "host": "localhost",

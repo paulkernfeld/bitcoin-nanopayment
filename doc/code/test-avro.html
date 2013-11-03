@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>test-random.js</title>
+  <title>test-avro.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -106,7 +106,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>test-random.js</h1>
+                  <h1>test-avro.js</h1>
               </div>
           </li>
         
@@ -118,82 +118,22 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>Copyright 2013 Paul Kernfeld</p>
-<p>This file is part of bitcoin-nanopayment.</p>
-<p> bitcoin-nanopayment is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.</p>
-<p> bitcoin-nanopayment is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.</p>
-<p> You should have received a copy of the GNU General Public License
- along with bitcoin-nanopayment.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-2">
-            <div class="annotation">
               
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-2">&#182;</a>
-              </div>
-              <p>Internal imports</p>
-
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> paymentBtc = require(<span class="string">'./util'</span>);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-3">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-3">&#182;</a>
-              </div>
-              <p>External imports</p>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> fs = require(<span class="string">'fs'</span>);
+<span class="keyword">var</span> DataFile = require(<span class="string">'node-avro-io'</span>).DataFile;
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-4">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
-              <p>Horribly weak visual test for random number generation</p>
+<span class="keyword">var</span> avro = DataFile.AvroFile();
+<span class="keyword">var</span> fileStream = fs.createWriteStream(<span class="string">'test.avro'</span>);
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>{
-  <span class="keyword">var</span> testUniformRandom = <span class="keyword">function</span>(n) {
-    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) {
-      <span class="keyword">var</span> random = paymentBtc.cryptoRandom(n);
-      assert(random &gt;= <span class="number">0</span>);
-      assert(random &lt; n);
-      console.log(random)
-    }
-  };
-
-  <span class="keyword">var</span> ns = [<span class="number">1</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">256</span>, <span class="number">1000</span>];
-
-  <span class="keyword">for</span> (<span class="keyword">var</span> n <span class="keyword">in</span> ns) {
-    testUniformRandom(ns[n]);
-  }
-}</pre></div></div>
+<span class="keyword">var</span> schema = <span class="string">'string'</span>;
+<span class="keyword">var</span> writer = avro.open(<span class="string">"test.avro"</span>, schema, { flags: <span class="string">'w'</span>});
+writer
+    .pipe(fileStream);
+writer.write(<span class="string">"The quick brown fox jumped over the lazy dogs"</span>)
+writer.write(<span class="string">"Another entry"</span>)
+writer    .end();</pre></div></div>
             
         </li>
         
