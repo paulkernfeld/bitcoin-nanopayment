@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# To make this work, symlink it from .git/hooks/pre-commit and make it executable.
+
+# Run docco
+echo "Running docco..."
+docco lib/*.js --output=doc/code
+git add doc/code
+#read -t1 -n1 -r -p "The status shown here is that actual status prior to committing (the status show in the editor was produced before documentation was generated. Press [Enter] to proceed with the commit."
+echo "Note that the status shown in the commit message editor will not reflect the auto-generated documentation added by the pre-commit hook."
