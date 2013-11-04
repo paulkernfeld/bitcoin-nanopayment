@@ -43,7 +43,7 @@ If the payee can generate many transaction ID's that are near to each other, he 
 
 Tests
 -----
-To run the tests, you'll need to create the file `config/bitcoind.json` like the following, to configure the connection to the bitcoind/Bitcoin-Qt 
+The library tests can be run by executing `lib/test-payment-lib.js`. To run the tests, you'll need to create the file `config/bitcoind.json` like the following, to configure the connection to the bitcoind/Bitcoin-Qt.
 
     {
       "host": "localhost",
@@ -63,6 +63,14 @@ You must also create `config/test-accounts.json` like the following:
 
 These files are not added to git, to avoid accidental sharing.
 
+The RPC tests can be run by executing `lib/test-payment-rpc.js`.
+
+TODO: finish RPC test documentation.
+
 The source and destination addresses must each have at least 0.01 BTC for the test to run.
+
+Details
+-------
+There are git commit hooks with instructions, stored in the tools folder.
 
 [mean-minimum-distance][http://mathoverflow.net/questions/1294/mean-minimum-distance-for-n-random-points-on-a-one-dimensional-line]
