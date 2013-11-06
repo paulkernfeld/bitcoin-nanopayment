@@ -209,7 +209,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>How many possible txid&#39;s are there?  16 ^ 64</p>
+              <p>How many possible txid&#39;s are there?  32 bytes = 16 ^ 64</p>
 
             </div>
             
@@ -231,7 +231,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> serializeTarget = exports.serializeTarget =
-  <span class="keyword">function</span>(amount, length, vout, start) {
+  <span class="function"><span class="keyword">function</span><span class="params">(amount, length, vout, start)</span> {</span>
     <span class="keyword">return</span> amount + <span class="string">'-'</span> + length + <span class="string">'-'</span> + vout + <span class="string">'-'</span> + start;
   };</pre></div></div>
             
@@ -248,7 +248,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="keyword">function</span>(target) {
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="function"><span class="keyword">function</span><span class="params">(target)</span> {</span>
   assert(<span class="keyword">typeof</span> target === <span class="string">'string'</span>, <span class="string">'target must be a string'</span>);
 
   <span class="keyword">var</span> split = target.split(<span class="string">'-'</span>);
@@ -262,7 +262,12 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
     vout: parseInt(split[<span class="number">2</span>]),
     start: split[<span class="number">3</span>]
   };
-};</pre></div></div>
+};
+
+exports.Client = <span class="function"><span class="keyword">function</span><span class="params">(clientConfig)</span> {</span>
+
+  <span class="keyword">var</span> rpcConfig = clientConfig.rpc;
+  assert(rpcConfig, <span class="string">'The rpcConfig must exist'</span>);</pre></div></div>
             
         </li>
         
@@ -278,7 +283,7 @@ Currently, it uses only one Bitcoin address.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.Account = <span class="keyword">function</span>(rpcConfig, address, privateKey, timeout, minConf) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.Account = <span class="function"><span class="keyword">function</span><span class="params">(address, privateKey)</span> {</span></pre></div></div>
             
         </li>
         
@@ -293,8 +298,10 @@ Currently, it uses only one Bitcoin address.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  timeout = <span class="keyword">typeof</span> timeout === <span class="string">'undefined'</span> ? DEFAULT_TIMEOUT : timeout;
-  minConf = <span class="keyword">typeof</span> minConf === <span class="string">'undefined'</span> ? <span class="number">1</span> : minConf;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> timeout = clientConfig.timeout;
+    <span class="keyword">var</span> minConf = clientConfig.minConf;
+    timeout = <span class="keyword">typeof</span> timeout === <span class="string">'undefined'</span> ? DEFAULT_TIMEOUT : timeout;
+    minConf = <span class="keyword">typeof</span> minConf === <span class="string">'undefined'</span> ? <span class="number">1</span> : minConf;</pre></div></div>
             
         </li>
         
@@ -309,13 +316,13 @@ Currently, it uses only one Bitcoin address.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  assert(util.isAddress(address), <span class="string">'address must be a valid Bitcoin address'</span>);
-  assert(
-    util.isPrivateKey(privateKey),
-    <span class="string">'privatekey must be a valid private key'</span>
-  );
-  assert(<span class="keyword">typeof</span> timeout == <span class="string">'number'</span>, <span class="string">'timeout must be a number'</span>);
-  assert(util.isInt(minConf), <span class="string">'minConf must be an integer'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    assert(util.isAddress(address), <span class="string">'address must be a valid Bitcoin address'</span>);
+    assert(
+      util.isPrivateKey(privateKey),
+      <span class="string">'privatekey must be a valid private key'</span>
+    );
+    assert(<span class="keyword">typeof</span> timeout == <span class="string">'number'</span>, <span class="string">'timeout must be a number'</span>);
+    assert(util.isInt(minConf), <span class="string">'minConf must be an integer'</span>);</pre></div></div>
             
         </li>
         
@@ -330,11 +337,11 @@ Currently, it uses only one Bitcoin address.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> addressBinary = base58.decodeChecked(address);
-  assert.equal(addressBinary.version, TESTNET_PUBLIC_VERSION);
-  <span class="keyword">var</span> addressHex = addressBinary.payload.toString(<span class="string">'hex'</span>);
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> addressBinary = base58.decodeChecked(address);
+    assert.equal(addressBinary.version, TESTNET_PUBLIC_VERSION);
+    <span class="keyword">var</span> addressHex = addressBinary.payload.toString(<span class="string">'hex'</span>);
 
-  <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(rpcConfig);</pre></div></div>
+    <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(rpcConfig);</pre></div></div>
             
         </li>
         
@@ -358,7 +365,7 @@ transaction we&#39;ll submit if we cash an incoming voucher.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> currentTarget = <span class="literal">null</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> currentTarget = <span class="literal">null</span>;</pre></div></div>
             
         </li>
         
@@ -375,11 +382,11 @@ at the same time, e.g. double spending.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> queue;
-  queue = async.queue(
-    <span class="function"><span class="keyword">function</span> <span class="params">(task, cb)</span> {</span> task(cb); },
-    <span class="number">1</span>
-  );</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> queue;
+    queue = async.queue(
+      <span class="function"><span class="keyword">function</span> <span class="params">(task, cb)</span> {</span> task(cb); },
+      <span class="number">1</span>
+    );</pre></div></div>
             
         </li>
         
@@ -404,10 +411,10 @@ of previous transactions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> getPrevious = <span class="keyword">function</span>(cb) {
-    <span class="keyword">var</span> balance = <span class="literal">null</span>;
-    <span class="keyword">var</span> previousTxid;
-    <span class="keyword">var</span> previousVout;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPrevious = <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
+      <span class="keyword">var</span> balance = <span class="literal">null</span>;
+      <span class="keyword">var</span> previousTxid;
+      <span class="keyword">var</span> previousVout;</pre></div></div>
             
         </li>
         
@@ -422,16 +429,16 @@ of previous transactions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    client.cmd(
-      <span class="string">'listunspent'</span>,
-      minConf,
-      <span class="number">999999</span>,
-      [address],
-      <span class="keyword">function</span>(err, transactions) {
-        <span class="keyword">if</span>(err) {
-          cb(err);
-          <span class="keyword">return</span>;
-        }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      client.cmd(
+        <span class="string">'listunspent'</span>,
+        minConf,
+        <span class="number">999999</span>,
+        [address],
+        <span class="function"><span class="keyword">function</span><span class="params">(err, transactions)</span> {</span>
+          <span class="keyword">if</span>(err) {
+            cb(err);
+            <span class="keyword">return</span>;
+          }</pre></div></div>
             
         </li>
         
@@ -447,34 +454,34 @@ of previous transactions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> transactions) {
-          <span class="keyword">var</span> transactionAmount =
-            Math.round(transactions[i].amount * SATOSHIS);
-          <span class="keyword">if</span> (balance === <span class="literal">null</span> ||
-              transactionAmount &gt; balance) {
-            previousTxid = transactions[i].txid;
-            previousVout = transactions[i].vout;
-            balance = transactionAmount;
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> transactions) {
+            <span class="keyword">var</span> transactionAmount =
+              Math.round(transactions[i].amount * SATOSHIS);
+            <span class="keyword">if</span> (balance === <span class="literal">null</span> ||
+                transactionAmount &gt; balance) {
+              previousTxid = transactions[i].txid;
+              previousVout = transactions[i].vout;
+              balance = transactionAmount;
+            }
+          }
+          
+          <span class="keyword">if</span>(balance &lt; AMOUNT) {
+            cb(<span class="string">"You don't have enoungh Bitcoins.  You need at least "</span> + AMOUNT +
+               <span class="string">' Satoshis to use this, you only have '</span> + balance);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (balance === <span class="literal">null</span>) {
+            cb(
+              <span class="string">'No unspent transactions found.  '</span> +
+                <span class="string">'Maybe there is an unconfirmed transaction to this address?'</span>);
+          } <span class="keyword">else</span> {
+            cb(<span class="literal">null</span>, {
+              balance: balance,
+              txid: previousTxid,
+              vout: previousVout
+            });
           }
         }
-        
-        <span class="keyword">if</span>(balance &lt; AMOUNT) {
-          cb(<span class="string">"You don't have enoungh Bitcoins.  You need at least "</span> + AMOUNT +
-             <span class="string">' Satoshis to use this, you only have '</span> + balance);
-        } <span class="keyword">else</span> <span class="keyword">if</span> (balance === <span class="literal">null</span>) {
-          cb(
-            <span class="string">'No unspent transactions found.  '</span> +
-              <span class="string">'Maybe there is an unconfirmed transaction to this address?'</span>);
-        } <span class="keyword">else</span> {
-          cb(<span class="literal">null</span>, {
-            balance: balance,
-            txid: previousTxid,
-            vout: previousVout
-          });
-        }
-      }
-    );
-  };</pre></div></div>
+      );
+    };</pre></div></div>
             
         </li>
         
@@ -502,14 +509,14 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.requestVoucher = <span class="keyword">function</span>(inverseProbability, fromAddress, cb) {
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(inverseProbability, fromAddress, cb)</span> {</span>
 
-    assert(
-      util.isInt(inverseProbability),
-      <span class="string">'inverseProbability must be an integer'</span>
-    );
-    assert(inverseProbability &gt;= <span class="number">1</span>, <span class="string">'inverseProbability must be &gt;= 1'</span>);
-    assert(util.isAddress(fromAddress), <span class="string">'fromAddress must be a string'</span>);</pre></div></div>
+      assert(
+        util.isInt(inverseProbability),
+        <span class="string">'inverseProbability must be an integer'</span>
+      );
+      assert(inverseProbability &gt;= <span class="number">1</span>, <span class="string">'inverseProbability must be &gt;= 1'</span>);
+      assert(util.isAddress(fromAddress), <span class="string">'fromAddress must be a string'</span>);</pre></div></div>
             
         </li>
         
@@ -524,9 +531,9 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> requestVoucher = <span class="keyword">function</span>(queueCb) {
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
 
-      async.waterfall([</pre></div></div>
+        async.waterfall([</pre></div></div>
             
         </li>
         
@@ -541,7 +548,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        getPrevious,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
             
         </li>
         
@@ -556,7 +563,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -574,8 +581,8 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> outputs = {};
-          outputs[fromAddress] = AMOUNT / SATOSHIS;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> outputs = {};
+            outputs[fromAddress] = AMOUNT / SATOSHIS;</pre></div></div>
             
         </li>
         
@@ -591,22 +598,22 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (previous.balance &gt; AMOUNT) {
-            outputs[address] = (previous.balance - AMOUNT) / SATOSHIS;
-            assert.equal(
-              Math.round((outputs[fromAddress] + outputs[address]) * SATOSHIS),
-              previous.balance,
-              <span class="string">'Balance rounding error!?'</span>
-            );
-          }
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (previous.balance &gt; AMOUNT) {
+              outputs[address] = (previous.balance - AMOUNT) / SATOSHIS;
+              assert.equal(
+                Math.round((outputs[fromAddress] + outputs[address]) * SATOSHIS),
+                previous.balance,
+                <span class="string">'Balance rounding error!?'</span>
+              );
+            }
 
-          client.cmd(
-            <span class="string">'createrawtransaction'</span>,
-            [{<span class="string">'txid'</span>: previous.txid, <span class="string">'vout'</span>: previous.vout}],
-            outputs,
-            waterfallCb
-          );
-        },</pre></div></div>
+            client.cmd(
+              <span class="string">'createrawtransaction'</span>,
+              [{<span class="string">'txid'</span>: previous.txid, <span class="string">'vout'</span>: previous.vout}],
+              outputs,
+              waterfallCb
+            );
+          },</pre></div></div>
             
         </li>
         
@@ -621,9 +628,9 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(transactionHex, waterfallCb) {
-          client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, waterfallCb);
-        },</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, waterfallCb)</span> {</span>
+            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, waterfallCb);
+          },</pre></div></div>
             
         </li>
         
@@ -638,7 +645,7 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -654,19 +661,19 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (!signed.complete) {
-            waterfallCb(<span class="string">'Setup transaction not complete'</span>);
-            <span class="keyword">return</span>;
-          }
-
-          client.cmd(
-            <span class="string">'decoderawtransaction'</span>,
-            signed.hex,
-            <span class="keyword">function</span>(err, transactionJson) {
-              waterfallCb(err, signed, transactionJson);
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (!signed.complete) {
+              waterfallCb(<span class="string">'Setup transaction not complete'</span>);
+              <span class="keyword">return</span>;
             }
-          );
-        },</pre></div></div>
+
+            client.cmd(
+              <span class="string">'decoderawtransaction'</span>,
+              signed.hex,
+              <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
+                waterfallCb(err, signed, transactionJson);
+              }
+            );
+          },</pre></div></div>
             
         </li>
         
@@ -681,7 +688,7 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(signed, transactionJson, waterfallCb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, transactionJson, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -696,13 +703,13 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          assert(
-            transactionJson.vout.length == <span class="number">1</span> ||
-              transactionJson.vout.length == <span class="number">2</span>,
-            <span class="string">'Unexpected number of vouts'</span>
-          );
+            <div class="content"><div class='highlight'><pre>            assert(
+              transactionJson.vout.length == <span class="number">1</span> ||
+                transactionJson.vout.length == <span class="number">2</span>,
+              <span class="string">'Unexpected number of vouts'</span>
+            );
 
-          <span class="keyword">var</span> txid = transactionJson.txid;</pre></div></div>
+            <span class="keyword">var</span> txid = transactionJson.txid;</pre></div></div>
             
         </li>
         
@@ -717,12 +724,12 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> offset = util.cryptoRandom(inverseProbability);
-          <span class="keyword">var</span> offsetBi = <span class="keyword">new</span> BigInteger();
-          offsetBi.fromInt(offset);
-          <span class="keyword">var</span> startBi = <span class="keyword">new</span> BigInteger();
-          startBi.fromString(txid, <span class="number">16</span>);
-          startBi = startBi.subtract(offsetBi).mod(TXID_RANGE_BI);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> offset = util.cryptoRandom(inverseProbability);
+            <span class="keyword">var</span> offsetBi = <span class="keyword">new</span> BigInteger();
+            offsetBi.fromInt(offset);
+            <span class="keyword">var</span> startBi = <span class="keyword">new</span> BigInteger();
+            startBi.fromString(txid, <span class="number">16</span>);
+            startBi = startBi.subtract(offsetBi).mod(TXID_RANGE_BI);</pre></div></div>
             
         </li>
         
@@ -740,12 +747,12 @@ have one target open at a time.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          currentTarget = {
-            start: startBi,
-            length: inverseProbability,
-            offset: offset,
-            transactionHex: signed.hex
-          };</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            currentTarget = {
+              start: startBi,
+              length: inverseProbability,
+              offset: offset,
+              transactionHex: signed.hex
+            };</pre></div></div>
             
         </li>
         
@@ -760,13 +767,13 @@ have one target open at a time.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> target = serializeTarget(
-            AMOUNT,
-            currentTarget.length,
-            <span class="number">0</span>,
-            startBi.toString(<span class="number">16</span>)
-          );
-          waterfallCb(<span class="literal">null</span>, target);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> target = serializeTarget(
+              AMOUNT,
+              currentTarget.length,
+              <span class="number">0</span>,
+              startBi.toString(<span class="number">16</span>)
+            );
+            waterfallCb(<span class="literal">null</span>, target);</pre></div></div>
             
         </li>
         
@@ -782,10 +789,10 @@ time window to get paid before we being our next operation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          setTimeout(queueCb, timeout);
-        }
-      ], cb);
-    };</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            setTimeout(queueCb, timeout);
+          }
+        ], cb);
+      };</pre></div></div>
             
         </li>
         
@@ -802,8 +809,8 @@ so it&#39;s fine.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    queue.push(requestVoucher, <span class="keyword">function</span>() {});
-  };</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      queue.push(requestVoucher, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>});
+    };</pre></div></div>
             
         </li>
         
@@ -824,7 +831,7 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.createVoucher = <span class="keyword">function</span>(destinationAddress, targetSerialized, cb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(destinationAddress, targetSerialized, cb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -839,7 +846,7 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    assert(util.isAddress(destinationAddress));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      assert(util.isAddress(destinationAddress));</pre></div></div>
             
         </li>
         
@@ -854,13 +861,13 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> target;
-    <span class="keyword">try</span> {
-      target = deserializeTarget(targetSerialized);
-    } <span class="keyword">catch</span> (err) {
-      cb(<span class="string">'Error deserializing target: '</span> + err);
-      <span class="keyword">return</span>;
-    }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> target;
+      <span class="keyword">try</span> {
+        target = deserializeTarget(targetSerialized);
+      } <span class="keyword">catch</span> (err) {
+        cb(<span class="string">'Error deserializing target: '</span> + err);
+        <span class="keyword">return</span>;
+      }</pre></div></div>
             
         </li>
         
@@ -875,10 +882,10 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (target.amount != AMOUNT) {
-      cb(<span class="string">'Transaction amount was '</span> + target.amount + <span class="string">', must be '</span> + AMOUNT);
-      <span class="keyword">return</span>;
-    }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (target.amount != AMOUNT) {
+        cb(<span class="string">'Transaction amount was '</span> + target.amount + <span class="string">', must be '</span> + AMOUNT);
+        <span class="keyword">return</span>;
+      }</pre></div></div>
             
         </li>
         
@@ -893,11 +900,11 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(destinationAddress == address) {
-      cb(
-        <span class="string">'The paying address may not be the same as the destination address'</span>);
-      <span class="keyword">return</span>;
-    }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span>(destinationAddress == address) {
+        cb(
+          <span class="string">'The paying address may not be the same as the destination address'</span>);
+        <span class="keyword">return</span>;
+      }</pre></div></div>
             
         </li>
         
@@ -912,9 +919,9 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> createVoucher = <span class="keyword">function</span>(queueCb) {
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
 
-      async.waterfall([</pre></div></div>
+        async.waterfall([</pre></div></div>
             
         </li>
         
@@ -929,7 +936,7 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        getPrevious,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
             
         </li>
         
@@ -945,7 +952,7 @@ creates a binary string representing the transaction.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -960,10 +967,10 @@ creates a binary string representing the transaction.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span>(AMOUNT &gt; previous.balance) {
-            cb(<span class="string">'Need '</span> + AMOUNT + <span class="string">', only have '</span> + previous.balance);
-            <span class="keyword">return</span>;
-          }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(AMOUNT &gt; previous.balance) {
+              cb(<span class="string">'Need '</span> + AMOUNT + <span class="string">', only have '</span> + previous.balance);
+              <span class="keyword">return</span>;
+            }</pre></div></div>
             
         </li>
         
@@ -980,8 +987,8 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> outputs = {};
-          outputs[destinationAddress] = AMOUNT * <span class="number">2</span> / SATOSHIS;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> outputs = {};
+            outputs[destinationAddress] = AMOUNT * <span class="number">2</span> / SATOSHIS;</pre></div></div>
             
         </li>
         
@@ -996,10 +1003,10 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (AMOUNT &lt; previous.balance) {
-            outputs[address] = (previous.balance - AMOUNT) / SATOSHIS;
-            assert.equal(Math.round((outputs[destinationAddress] + outputs[address]) * SATOSHIS), previous.balance + AMOUNT);
-          }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (AMOUNT &lt; previous.balance) {
+              outputs[address] = (previous.balance - AMOUNT) / SATOSHIS;
+              assert.equal(Math.round((outputs[destinationAddress] + outputs[address]) * SATOSHIS), previous.balance + AMOUNT);
+            }</pre></div></div>
             
         </li>
         
@@ -1014,11 +1021,11 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> targetStartBi = <span class="keyword">new</span> BigInteger();
-          targetStartBi.fromString(target.start, <span class="number">16</span>);
-          <span class="keyword">var</span> randomBi = <span class="keyword">new</span> BigInteger();
-          randomBi.fromInt(util.cryptoRandom(target.length));
-          <span class="keyword">var</span> previousTxidGuess = targetStartBi.add(randomBi).mod(TXID_RANGE_BI).toString(<span class="number">16</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> targetStartBi = <span class="keyword">new</span> BigInteger();
+            targetStartBi.fromString(target.start, <span class="number">16</span>);
+            <span class="keyword">var</span> randomBi = <span class="keyword">new</span> BigInteger();
+            randomBi.fromInt(util.cryptoRandom(target.length));
+            <span class="keyword">var</span> previousTxidGuess = targetStartBi.add(randomBi).mod(TXID_RANGE_BI).toString(<span class="number">16</span>);</pre></div></div>
             
         </li>
         
@@ -1033,16 +1040,16 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">while</span>(previousTxidGuess.length &lt; <span class="number">64</span>) {
-            previousTxidGuess = <span class="string">'0'</span> + previousTxidGuess;
-          }
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">while</span>(previousTxidGuess.length &lt; <span class="number">64</span>) {
+              previousTxidGuess = <span class="string">'0'</span> + previousTxidGuess;
+            }
 
-          <span class="keyword">var</span> waterfallTranslator = <span class="keyword">function</span>(err, transactionHex) {
-            waterfallCb(err, transactionHex, previousTxidGuess);
-          }
+            <span class="keyword">var</span> waterfallTranslator = <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
+              waterfallCb(err, transactionHex, previousTxidGuess);
+            }
 
-          client.cmd(<span class="string">'createrawtransaction'</span>, [{<span class="string">'txid'</span>: previousTxidGuess, <span class="string">'vout'</span>: target.vout}, {<span class="string">'txid'</span>: previous.txid, <span class="string">'vout'</span>: previous.vout}], outputs, waterfallTranslator);
-        },</pre></div></div>
+            client.cmd(<span class="string">'createrawtransaction'</span>, [{<span class="string">'txid'</span>: previousTxidGuess, <span class="string">'vout'</span>: target.vout}, {<span class="string">'txid'</span>: previous.txid, <span class="string">'vout'</span>: previous.vout}], outputs, waterfallTranslator);
+          },</pre></div></div>
             
         </li>
         
@@ -1057,11 +1064,11 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(transactionHex, previousTxidGuess, waterfallCb) {
-          <span class="keyword">var</span> scriptPubKey = script.addressToScript(addressHex);
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, previousTxidGuess, waterfallCb)</span> {</span>
+            <span class="keyword">var</span> scriptPubKey = script.addressToScript(addressHex);
 
-          client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, [{<span class="string">'txid'</span>: previousTxidGuess,<span class="string">'vout'</span>: target.vout, <span class="string">'scriptPubKey'</span>: scriptPubKey, <span class="string">'redeemScript'</span>: privateKey}], waterfallCb);
-        },</pre></div></div>
+            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, [{<span class="string">'txid'</span>: previousTxidGuess,<span class="string">'vout'</span>: target.vout, <span class="string">'scriptPubKey'</span>: scriptPubKey, <span class="string">'redeemScript'</span>: privateKey}], waterfallCb);
+          },</pre></div></div>
             
         </li>
         
@@ -1076,7 +1083,7 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -1091,7 +1098,7 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          assert(signed.complete);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            assert(signed.complete);</pre></div></div>
             
         </li>
         
@@ -1108,15 +1115,15 @@ invalid.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          currentTarget = <span class="literal">null</span>;
-          
-          waterfallCb(<span class="literal">null</span>, signed.hex);
-        }
-      ], queueCb);
-    };
+            <div class="content"><div class='highlight'><pre>            currentTarget = <span class="literal">null</span>;
+            
+            waterfallCb(<span class="literal">null</span>, signed.hex);
+          }
+        ], queueCb);
+      };
 
-    queue.push(createVoucher, cb);
-  };</pre></div></div>
+      queue.push(createVoucher, cb);
+    };</pre></div></div>
             
         </li>
         
@@ -1138,7 +1145,7 @@ If the voucher is valid, call cb(null, cashed)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.cashVoucher = <span class="keyword">function</span>(transactionHex, cb) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -1153,12 +1160,12 @@ If the voucher is valid, call cb(null, cashed)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, transactionJson) {
+            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
 
-      <span class="keyword">if</span>(err) {
-        cb(<span class="string">'Error decoding transaction: '</span> + err);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+        <span class="keyword">if</span>(err) {
+          cb(<span class="string">'Error decoding transaction: '</span> + err);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1175,10 +1182,10 @@ TODO: remove this check by looping over vouts</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (transactionJson.vout.length &lt; <span class="number">1</span>) {
-        cb(<span class="string">'there must be at least one vout (there may be another to get change)'</span>);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (transactionJson.vout.length &lt; <span class="number">1</span>) {
+          cb(<span class="string">'there must be at least one vout (there may be another to get change)'</span>);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1194,9 +1201,9 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      assert.equal(Math.round(transactionJson.vout[<span class="number">0</span>][<span class="string">'value'</span>] * SATOSHIS), AMOUNT * <span class="number">2</span>);
+            <div class="content"><div class='highlight'><pre>        assert.equal(Math.round(transactionJson.vout[<span class="number">0</span>][<span class="string">'value'</span>] * SATOSHIS), AMOUNT * <span class="number">2</span>);
 
-      <span class="keyword">var</span> destinationAddress = transactionJson.vout[<span class="number">0</span>].scriptPubKey.addresses[<span class="number">0</span>];</pre></div></div>
+        <span class="keyword">var</span> destinationAddress = transactionJson.vout[<span class="number">0</span>].scriptPubKey.addresses[<span class="number">0</span>];</pre></div></div>
             
         </li>
         
@@ -1211,9 +1218,9 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> previousTxid = transactionJson.vin[<span class="number">0</span>].txid;
-      <span class="keyword">var</span> previousTxidBi = <span class="keyword">new</span> BigInteger();
-      previousTxidBi.fromString(previousTxid, <span class="number">16</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> previousTxid = transactionJson.vin[<span class="number">0</span>].txid;
+        <span class="keyword">var</span> previousTxidBi = <span class="keyword">new</span> BigInteger();
+        previousTxidBi.fromString(previousTxid, <span class="number">16</span>);</pre></div></div>
             
         </li>
         
@@ -1228,10 +1235,10 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (destinationAddress != address) {
-        cb(<span class="string">'wrong destination address: is '</span> + destinationAddress + <span class="string">', should be '</span> + address);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (destinationAddress != address) {
+          cb(<span class="string">'wrong destination address: is '</span> + destinationAddress + <span class="string">', should be '</span> + address);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1246,10 +1253,10 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (!currentTarget) {
-        cb(<span class="string">'No target set up'</span>);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!currentTarget) {
+          cb(<span class="string">'No target set up'</span>);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1264,10 +1271,10 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (previousTxidBi.compareTo(currentTarget.start) &lt; <span class="number">0</span>) {
-        cb(<span class="string">'txid too low'</span>);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (previousTxidBi.compareTo(currentTarget.start) &lt; <span class="number">0</span>) {
+          cb(<span class="string">'txid too low'</span>);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1282,13 +1289,13 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> targetLength = <span class="keyword">new</span> BigInteger();
-      targetLength.fromInt(currentTarget.length);
-      <span class="keyword">var</span> targetEnd = currentTarget.start.add(targetLength);
-      <span class="keyword">if</span> (previousTxidBi.compareTo(targetEnd) &gt;= <span class="number">0</span>) {
-        cb(<span class="string">'txid too high'</span>);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> targetLength = <span class="keyword">new</span> BigInteger();
+        targetLength.fromInt(currentTarget.length);
+        <span class="keyword">var</span> targetEnd = currentTarget.start.add(targetLength);
+        <span class="keyword">if</span> (previousTxidBi.compareTo(targetEnd) &gt;= <span class="number">0</span>) {
+          cb(<span class="string">'txid too high'</span>);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1303,10 +1310,10 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> targetOffset = <span class="keyword">new</span> BigInteger();
-      targetOffset.fromInt(currentTarget.offset);
-      <span class="keyword">if</span> (previousTxidBi.compareTo(currentTarget.start.add(targetOffset)) !== <span class="number">0</span>) {
-        cb(<span class="literal">null</span>, <span class="literal">false</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> targetOffset = <span class="keyword">new</span> BigInteger();
+        targetOffset.fromInt(currentTarget.offset);
+        <span class="keyword">if</span> (previousTxidBi.compareTo(currentTarget.start.add(targetOffset)) !== <span class="number">0</span>) {
+          cb(<span class="literal">null</span>, <span class="literal">false</span>);</pre></div></div>
             
         </li>
         
@@ -1322,9 +1329,9 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        currentTarget = <span class="literal">null</span>;
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          currentTarget = <span class="literal">null</span>;
+          <span class="keyword">return</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -1340,8 +1347,8 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="keyword">function</span>(err, txid) {
-        <span class="keyword">if</span>(err) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+          <span class="keyword">if</span>(err) {</pre></div></div>
             
         </li>
         
@@ -1356,9 +1363,9 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          cb(<span class="string">'Error sending setup transaction: '</span> + currentTarget.transactionHex + <span class="string">' '</span> + err);
-          <span class="keyword">return</span>;
-        }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            cb(<span class="string">'Error sending setup transaction: '</span> + currentTarget.transactionHex + <span class="string">' '</span> + err);
+            <span class="keyword">return</span>;
+          }</pre></div></div>
             
         </li>
         
@@ -1373,7 +1380,7 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        currentTarget = <span class="literal">null</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          currentTarget = <span class="literal">null</span>;</pre></div></div>
             
         </li>
         
@@ -1388,17 +1395,18 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, txid) {
-          <span class="keyword">if</span>(err) {
-            cb(<span class="string">'Error sending real transaction: '</span> + err);
-          } <span class="keyword">else</span> {
-            cb(<span class="literal">null</span>, <span class="literal">true</span>);
-          }
+            <div class="content"><div class='highlight'><pre>          client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+            <span class="keyword">if</span>(err) {
+              cb(<span class="string">'Error sending real transaction: '</span> + err);
+            } <span class="keyword">else</span> {
+              cb(<span class="literal">null</span>, <span class="literal">true</span>);
+            }
+          });
         });
       });
-    });
+    };
   };
-}
+};
 
 Object.freeze(exports);</pre></div></div>
             

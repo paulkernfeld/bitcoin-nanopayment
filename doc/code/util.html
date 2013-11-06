@@ -151,7 +151,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="keyword">function</span>(n) {
+            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="function"><span class="keyword">function</span><span class="params">(n)</span> {</span>
   assert(n &gt; <span class="number">0</span>);</pre></div></div>
             
         </li>
@@ -203,11 +203,11 @@ We need:   8 ^ nBytes &gt;= n</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Verify that this variable is an integer</p>
+              <p>/Verify that this variable is an integer</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="keyword">function</span>(n) {
+            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="function"><span class="keyword">function</span><span class="params">(n)</span> {</span>
    <span class="keyword">return</span> <span class="keyword">typeof</span> n === <span class="string">'number'</span> &amp;&amp; n % <span class="number">1</span> == <span class="number">0</span>;
 };</pre></div></div>
             
@@ -221,10 +221,11 @@ We need:   8 ^ nBytes &gt;= n</p>
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>Verify that this variable is a Bitcoin address</p>
+<p>TODO: Make this more specific</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="keyword">function</span>(a) {
+            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="function"><span class="keyword">function</span><span class="params">(a)</span> {</span>
   <span class="keyword">return</span> <span class="keyword">typeof</span> a === <span class="string">'string'</span>;
 };</pre></div></div>
             
@@ -238,10 +239,11 @@ We need:   8 ^ nBytes &gt;= n</p>
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Verify that this variable is a Bitcoin private key</p>
+<p>TODO: Make this more specific</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="keyword">function</span>(pk) {
+            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="function"><span class="keyword">function</span><span class="params">(pk)</span> {</span>
   <span class="keyword">return</span> <span class="keyword">typeof</span> pk === <span class="string">'string'</span>;
 };</pre></div></div>
             

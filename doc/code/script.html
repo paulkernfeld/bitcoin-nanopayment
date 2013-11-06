@@ -136,7 +136,7 @@ Bitcoin Script: <a href="https://en.bitcoin.it/wiki/Script">https://en.bitcoin.i
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.addressToScript = <span class="keyword">function</span>(addressHex) {
+            <div class="content"><div class='highlight'><pre>exports.addressToScript = <span class="function"><span class="keyword">function</span><span class="params">(addressHex)</span> {</span>
   <span class="keyword">var</span> scriptStart = <span class="string">'76a914'</span>;
   <span class="keyword">var</span> scriptEnd = <span class="string">'88ac'</span>;
   <span class="keyword">return</span> scriptStart + addressHex + scriptEnd;

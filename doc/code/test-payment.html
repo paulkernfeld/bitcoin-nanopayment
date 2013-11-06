@@ -119,7 +119,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> nanopayments = require(<span class="string">'../lib/bitcoin-nanopayment'</span>);
-<span class="keyword">var</span> Account = nanopayments.Account;
+<span class="keyword">var</span> Client = nanopayments.Client;
 <span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
             
         </li>
@@ -156,8 +156,8 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> rpcConfigText = fs.readFileSync(<span class="string">'config/rpc.json'</span>, <span class="string">'utf8'</span>);
-<span class="keyword">var</span> rpcConfig = JSON.parse(rpcConfigText);
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> clientConfigText = fs.readFileSync(<span class="string">'config/client.json'</span>, <span class="string">'utf8'</span>);
+<span class="keyword">var</span> clientConfig = JSON.parse(clientConfigText);
 <span class="keyword">var</span> accountConfigText = fs.readFileSync(<span class="string">'config/test-accounts.json'</span>, <span class="string">'utf8'</span>);
 <span class="keyword">var</span> accountConfig = JSON.parse(accountConfigText);</pre></div></div>
             
@@ -174,7 +174,8 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>{</pre></div></div>
+            <div class="content"><div class='highlight'><pre>{
+  <span class="keyword">var</span> client = <span class="keyword">new</span> Client(clientConfig);</pre></div></div>
             
         </li>
         
@@ -189,24 +190,16 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> sourceAccount = <span class="keyword">new</span> Account(
-    rpcConfig,
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> sourceAccount = <span class="keyword">new</span> client.Account(
     accountConfig.sourceAddress,
-    accountConfig.sourcePrivateKey,
-    <span class="number">1000</span>,
-    <span class="number">0</span>
+    accountConfig.sourcePrivateKey
   );
-
-  <span class="keyword">var</span> destinationAccount = <span class="keyword">new</span> Account(
-    rpcConfig,
+  
+  <span class="keyword">var</span> destinationAccount = <span class="keyword">new</span> client.Account(
     accountConfig.destinationAddress,
-    accountConfig.destinationPrivateKey,
-    <span class="number">1000</span>,
-    <span class="number">0</span>
+    accountConfig.destinationPrivateKey
   );
-
-  <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(rpcConfig);
-
+  
   <span class="keyword">var</span> destinationAddress = accountConfig.destinationAddress;
 
   async.waterfall([</pre></div></div>
@@ -224,11 +217,11 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
       destinationAccount.requestVoucher(
         <span class="number">1</span>,
         accountConfig.sourceAddress,
-        <span class="keyword">function</span>(err, targetSerialized) {
+        <span class="function"><span class="keyword">function</span><span class="params">(err, targetSerialized)</span> {</span>
           assert(!err, util.inspect(err));
           console.log(<span class="string">'Voucher requested.'</span>);
 
@@ -265,11 +258,11 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(range, cb) {
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(range, cb)</span> {</span>
       sourceAccount.createVoucher(
         destinationAddress,
         range,
-        <span class="keyword">function</span>(err, transactionHex) {
+        <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
           assert(!err, util.inspect(err));
           console.log(<span class="string">'Voucher created.'</span>);
           cb(err, transactionHex);
@@ -290,8 +283,8 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(transactionHex, cb) {
-      destinationAccount.cashVoucher(transactionHex, <span class="keyword">function</span>(err, cashed) {
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span>
+      destinationAccount.cashVoucher(transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, cashed)</span> {</span>
         assert(!err, util.inspect(err));
         assert(cashed, <span class="string">"The voucher wasn't cashable?"</span>);
         console.log(<span class="string">'Transaction cashed.'</span>);
