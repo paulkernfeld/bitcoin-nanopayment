@@ -4,7 +4,7 @@ Copyright 2013 Paul Kernfeld.  This software is released under the [GNU GPL v3][
 
 The fundamental problem with Bitcoin nanopayments is that making massive numbers of payments would take up too much space on the blockchain. Probabilistic nanopayments are one way to solve this problem without requiring significant computing resources or trust in a centralized system.
 
-bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to bitcoind/Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and jevon.
+bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to bitcoind/Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
 
 ### What are probabilistic nanopayments?
 A probabilistic nanopayment is a payment from one party to another that succeeds with a certain probability, and otherwise does nothing. In order for the parties to determine the expected amount that will be paid, they must both know the probability of success, and they should not be able to manipulate that probability.
@@ -88,11 +88,7 @@ Create or modify bitcoind/Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to en
 
 How to Use
 ----------
-This library can be used as a library from a Node application, or as an RPC call from another application. See `lib/test-payment-lib.js` and `lib/test-payment-rpc.js` for examples of how to use this.
-
-TODO: more detail here
-
-Either way, Alice can pay Bob as follows:
+Alice can pay Bob as follows:
 
 ### Step 1
 Bob requests a payment from Alice by calling the `requestVoucher` method.  He sends the result of this method (the "target") to Alice.
@@ -112,6 +108,7 @@ You can simulate this process by running two instances of `demo.js` and sending 
 [nanopayments]: https://en.bitcoin.it/wiki/Nanopayments "The Bitcoin wiki's explanation of the probabilistic nanopayment protocol"
 [proposal]: https://bitcointalk.org/index.php?topic=62558.msg836758#msg836758
 [casascius]: https://www.casascius.com/
+[jevon]: https://twitter.com/jevon
 [micropayments]: https://en.bitcoin.it/wiki/Contracts#Example_7:_Rapidly-adjusted_.28micro.29payments_to_a_pre-determined_party "The Bitcoin wiki's explanation of the rapidly-adjected micropayment channel protocol"
 [fees]: https://en.bitcoin.it/wiki/Transaction_fees "The Bitcoin wiki's summary of transaction fees"
 [bitcoind]: http://bitcoin.org/en/download "Download bitcoind/Bitcoin-Qt"
