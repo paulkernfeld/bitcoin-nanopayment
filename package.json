@@ -1,6 +1,6 @@
 {
   "name": "bitcoin-nanopayment",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Send probabilistic Bitcoin nanopayments",
   "keywords": ["bitcoin", "btc", "micropayment", "nanopayment"],
   "author": {
@@ -15,8 +15,7 @@
     "async": "latest",
     "bitcoin": "latest",
     "buffertools": "latest",
-	"colors": "latest",
-    "jayson": "latest"
+	"colors": "latest"
   },
   "devDependencies": {
 	"docco": "latest"

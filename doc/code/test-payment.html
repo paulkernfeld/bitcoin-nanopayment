@@ -39,23 +39,8 @@
               </a>
             
               
-              <a class="source" href="rpc-client.html">
-                rpc-client.js
-              </a>
-            
-              
-              <a class="source" href="rpc-server.html">
-                rpc-server.js
-              </a>
-            
-              
               <a class="source" href="script.html">
                 script.js
-              </a>
-            
-              
-              <a class="source" href="test-avro.html">
-                test-avro.js
               </a>
             
               
@@ -64,23 +49,8 @@
               </a>
             
               
-              <a class="source" href="test-jayson.html">
-                test-jayson.js
-              </a>
-            
-              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
-              </a>
-            
-              
-              <a class="source" href="test-payment-lib.html">
-                test-payment-lib.js
-              </a>
-            
-              
-              <a class="source" href="test-payment-rpc.html">
-                test-payment-rpc.js
               </a>
             
               
@@ -149,7 +119,8 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> nanopayments = require(<span class="string">'../lib/bitcoin-nanopayment'</span>);
-<span class="keyword">var</span> Account = nanopayments.Account;</pre></div></div>
+<span class="keyword">var</span> Account = nanopayments.Account;
+<span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
             
         </li>
         
@@ -180,15 +151,15 @@
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>This test creates two accounts in the user&#39;s wallet, and sends a nanopayment
-from &quot;source&quot; to &quot;destination&quot;.</p>
-<p>Send a transaction from the source address to the destination address</p>
+from one to the other.</p>
+<p>Load configs</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.test = <span class="keyword">function</span>(sourceAccount, destinationAccount) {
-  <span class="keyword">var</span> destinationAddress = destinationAccount.address;
-
-  async.waterfall([</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> rpcConfigText = fs.readFileSync(<span class="string">'config/rpc.json'</span>, <span class="string">'utf8'</span>);
+<span class="keyword">var</span> rpcConfig = JSON.parse(rpcConfigText);
+<span class="keyword">var</span> accountConfigText = fs.readFileSync(<span class="string">'config/test-accounts.json'</span>, <span class="string">'utf8'</span>);
+<span class="keyword">var</span> accountConfig = JSON.parse(accountConfigText);</pre></div></div>
             
         </li>
         
@@ -199,19 +170,11 @@ from &quot;source&quot; to &quot;destination&quot;.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>The recipient requests the payment</p>
+              <p>Send a transaction from the source address to the destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
-      destinationAccount.requestVoucher(
-        <span class="number">1</span>,
-        sourceAccount.address,
-        <span class="keyword">function</span>(err, targetSerialized) {
-          assert(!err, util.inspect(err));
-          console.log(<span class="string">'Voucher requested.'</span>);
-
-          <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>{</pre></div></div>
             
         </li>
         
@@ -221,6 +184,64 @@ from &quot;source&quot; to &quot;destination&quot;.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Make two new accounts</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> sourceAccount = <span class="keyword">new</span> Account(
+    rpcConfig,
+    accountConfig.sourceAddress,
+    accountConfig.sourcePrivateKey,
+    <span class="number">1000</span>,
+    <span class="number">0</span>
+  );
+
+  <span class="keyword">var</span> destinationAccount = <span class="keyword">new</span> Account(
+    rpcConfig,
+    accountConfig.destinationAddress,
+    accountConfig.destinationPrivateKey,
+    <span class="number">1000</span>,
+    <span class="number">0</span>
+  );
+
+  <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(rpcConfig);
+
+  <span class="keyword">var</span> destinationAddress = accountConfig.destinationAddress;
+
+  async.waterfall([</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>The recipient requests the payment</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
+      destinationAccount.requestVoucher(
+        <span class="number">1</span>,
+        accountConfig.sourceAddress,
+        <span class="keyword">function</span>(err, targetSerialized) {
+          assert(!err, util.inspect(err));
+          console.log(<span class="string">'Voucher requested.'</span>);
+
+          <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>Make sure the length of the range is 1</p>
 
@@ -234,11 +255,11 @@ from &quot;source&quot; to &quot;destination&quot;.</p>
         </li>
         
         
-        <li id="section-7">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>The payer creates the payment voucher based on the request</p>
 
@@ -259,11 +280,11 @@ from &quot;source&quot; to &quot;destination&quot;.</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>The recipient cashes the payment voucher in</p>
 

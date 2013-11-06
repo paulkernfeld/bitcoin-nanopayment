@@ -4,7 +4,7 @@ Copyright 2013 Paul Kernfeld.  This software is released under the [GNU GPL v3][
 
 The fundamental problem with Bitcoin nanopayments is that making massive numbers of payments would take up too much space on the blockchain. Probabilistic nanopayments are one way to solve this problem without requiring significant computing resources or trust in a centralized system.
 
-bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to bitcoind/Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
+bitcoin-nanopayment is a Node library that allows users to send probabilistic Bitcoin nanopayments to others.  It works on top of ordinary Bitcoin, and uses RPC calls to Bitcoin-Qt to create, verify, and "cash in" payments.  This library is an implementation of [this probabilistic nanopayment strategy][nanopayments] first [proposed][proposal] by [casascius][casascius] and [jevon][jevon].
 
 ### What are probabilistic nanopayments?
 A probabilistic nanopayment is a payment from one party to another that succeeds with a certain probability, and otherwise does nothing. In order for the parties to determine the expected amount that will be paid, they must both know the probability of success, and they should not be able to manipulate that probability.
@@ -12,7 +12,7 @@ A probabilistic nanopayment is a payment from one party to another that succeeds
 Probabilistic Nanopayments
 --------------------------
 ### What does this library do?
-bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's bitcoind/Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known and verifiable probability of succeeding.
+bitcoin-nanopayment allows users to send probabilistic Bitcoin nanopayments to others.  The library can send and receive nanopayments into a user's Bitcoin-Qt wallet using the RPC API.  It lets users create "vouchers," which are Bitcoin transactions that have a known and verifiable probability of succeeding.
 
 ### How does this library work?
 This library lets users request, generate, and cash in vouchers that succeed with probability 1 / *K*, where *K* ≥ 1 is an integer.  Otherwise, with probability ( *K* - 1) / *K*, the voucher does nothing.  When sending a voucher for value *x* that succeeds with probability 1 / *K*, the monetary value of the voucher is *x* / *K*.  This library generates the vouchers, and the user is responsible for sending them between users.
@@ -49,14 +49,14 @@ Properties
 * The recipient must hold the private key for the account that's being paid to
 * The payee must have a small amount of money to get paid
 * The payee can be DDoS'ed unless he is able to filter out illegitimate payment requests
-* Each payment that goes through requires two transactions (hence double the transaction fee)
+* Each payment requires two transactions (hence double the transaction fee)
 * The rate at which the payee can be paid depends on how much money the payee has
 * Payment requires two round trips between the payer and payee
 * Only supports payments with probability *1/K*, where *K* is an integer
 
 #### Of this implementation
 * Stores the private key in a plaintext file
-* Requires use of bitcoind/Bitcoin-Qt's RPC functionality
+* Requires use of Bitcoin-Qt's RPC functionality
 * Hardcoded to only send transactions for 0.01 BTC (smallest no-fee tx as of August 2013)
 * Can only send or receive one transaction at a time
 * Hardcoded to use testnet bitcoins
@@ -74,10 +74,10 @@ The ratio of actual returns to expected returns is a distribution with mean 1 an
 
 Setup
 -----
-### bitcoind/Bitcoin-Qt setup
-In order to use this library, you must install [bitcoind/Bitcoin-Qt][bitcoind] and enable RPC.
+### Bitcoin-Qt setup
+In order to use this library, you must install [Bitcoin-Qt][bitcoin-qt] and enable RPC.
 
-Create or modify bitcoind/Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to enable the RPC server.  Set `testnet` to `1` only if you're using the testnet.  Be aware that this lets any program that can read this password have access to your Bitcoin wallet.  **THIS IS A SECURITY RISK.**
+Create or modify Bitcoin-Qt's [`bitcoin.conf`][bitcoin-conf] file to enable the RPC server.  Set `testnet` to `1` only if you're using the testnet.  Be aware that this lets any program that can read this password have access to your Bitcoin wallet.  **THIS IS A SECURITY RISK.**
 
     testnet=1
 
@@ -111,5 +111,5 @@ You can simulate this process by running two instances of `demo.js` and sending 
 [jevon]: https://twitter.com/jevon
 [micropayments]: https://en.bitcoin.it/wiki/Contracts#Example_7:_Rapidly-adjusted_.28micro.29payments_to_a_pre-determined_party "The Bitcoin wiki's explanation of the rapidly-adjected micropayment channel protocol"
 [fees]: https://en.bitcoin.it/wiki/Transaction_fees "The Bitcoin wiki's summary of transaction fees"
-[bitcoind]: http://bitcoin.org/en/download "Download bitcoind/Bitcoin-Qt"
+[bitcoin-qt]: http://bitcoin.org/en/download "Download Bitcoin-Qt"
 [bitcoin-conf]: https://en.bitcoin.it/wiki/Running_Bitcoin#Bitcoin.conf_Configuration_File  "The Bitcoin wiki's intro to bitcoin.conf files"
