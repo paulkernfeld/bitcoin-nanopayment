@@ -39,6 +39,16 @@
               </a>
             
               
+              <a class="source" href="rpc-client.html">
+                rpc-client.js
+              </a>
+            
+              
+              <a class="source" href="rpc-server.html">
+                rpc-server.js
+              </a>
+            
+              
               <a class="source" href="script.html">
                 script.js
               </a>
@@ -49,8 +59,23 @@
               </a>
             
               
+              <a class="source" href="test-jayson.html">
+                test-jayson.js
+              </a>
+            
+              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-lib.html">
+                test-payment-lib.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-rpc.html">
+                test-payment-rpc.js
               </a>
             
               
@@ -231,7 +256,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> serializeTarget = exports.serializeTarget =
-  <span class="function"><span class="keyword">function</span><span class="params">(amount, length, vout, start)</span> {</span>
+  <span class="keyword">function</span>(amount, length, vout, start) {
     <span class="keyword">return</span> amount + <span class="string">'-'</span> + length + <span class="string">'-'</span> + vout + <span class="string">'-'</span> + start;
   };</pre></div></div>
             
@@ -248,7 +273,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="function"><span class="keyword">function</span><span class="params">(target)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="keyword">function</span>(target) {
   assert(<span class="keyword">typeof</span> target === <span class="string">'string'</span>, <span class="string">'target must be a string'</span>);
 
   <span class="keyword">var</span> split = target.split(<span class="string">'-'</span>);
@@ -262,12 +287,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
     vout: parseInt(split[<span class="number">2</span>]),
     start: split[<span class="number">3</span>]
   };
-};
-
-exports.Client = <span class="function"><span class="keyword">function</span><span class="params">(clientConfig)</span> {</span>
-
-  <span class="keyword">var</span> rpcConfig = clientConfig.rpc;
-  assert(rpcConfig, <span class="string">'The rpcConfig must exist'</span>);</pre></div></div>
+};</pre></div></div>
             
         </li>
         
@@ -278,12 +298,25 @@ exports.Client = <span class="function"><span class="keyword">function</span><sp
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>This object encapsulates logic to request, send, and cash in vouchers.
-Currently, it uses only one Bitcoin address.</p>
+              <p>This creates a client object that accesses bitcoind/Bitcoin-Qt over RPC to
+execute nanopayments. clientConfig should look like:</p>
+<p>{
+  timeout: integer (optional, milliseconds),
+  minConf: integer (optional),
+  bitcoind: {
+    host: string,
+    port: integer,
+    user: string,
+    pass: string
+  }
+}</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.Account = <span class="function"><span class="keyword">function</span><span class="params">(address, privateKey)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.Client = <span class="keyword">function</span>(clientConfig) {
+
+  <span class="keyword">var</span> bitcoindConfig = clientConfig.bitcoind;
+  assert(bitcoindConfig, <span class="string">'The bitcoindConfig must exist'</span>);</pre></div></div>
             
         </li>
         
@@ -293,6 +326,25 @@ Currently, it uses only one Bitcoin address.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>This object encapsulates logic to request, send, and cash in vouchers.
+Currently, it uses only one Bitcoin address. This does <em>not</em> relate to
+bitcoind/Bitcoin-Qt&#39;s built-in account functionality.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Account = <span class="keyword">function</span>(address, privateKey) {
+
+    <span class="keyword">this</span>.address = address;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Set default values</p>
 
@@ -306,11 +358,11 @@ Currently, it uses only one Bitcoin address.</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Verify argument types</p>
 
@@ -327,11 +379,11 @@ Currently, it uses only one Bitcoin address.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Convert the address into hex representation</p>
 
@@ -341,16 +393,16 @@ Currently, it uses only one Bitcoin address.</p>
     assert.equal(addressBinary.version, TESTNET_PUBLIC_VERSION);
     <span class="keyword">var</span> addressHex = addressBinary.payload.toString(<span class="string">'hex'</span>);
 
-    <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(rpcConfig);</pre></div></div>
+    <span class="keyword">var</span> client = <span class="keyword">new</span> bitcoin.Client(bitcoindConfig);</pre></div></div>
             
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>The target allows us to validate and cash incoming vouchers.  It contains
 information about the range of txid&#39;s that may be guessed, and the hex
@@ -370,11 +422,11 @@ transaction we&#39;ll submit if we cash an incoming voucher.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>This queue is basically just a lock, so it&#39;s always called with a
 concurrency of 1.  The purpose is to prevent us from doing two operations
@@ -391,11 +443,11 @@ at the same time, e.g. double spending.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>This must be finished running before using this account can be used.
 This function initializes the account by looking up the previous unspent
@@ -411,7 +463,7 @@ of previous transactions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPrevious = <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPrevious = <span class="keyword">function</span>(cb) {
       <span class="keyword">var</span> balance = <span class="literal">null</span>;
       <span class="keyword">var</span> previousTxid;
       <span class="keyword">var</span> previousVout;</pre></div></div>
@@ -419,11 +471,11 @@ of previous transactions.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Retrieve the txid of the most recent tx into my account</p>
 
@@ -434,7 +486,7 @@ of previous transactions.</p>
         minConf,
         <span class="number">999999</span>,
         [address],
-        <span class="function"><span class="keyword">function</span><span class="params">(err, transactions)</span> {</span>
+        <span class="keyword">function</span>(err, transactions) {
           <span class="keyword">if</span>(err) {
             cb(err);
             <span class="keyword">return</span>;
@@ -443,11 +495,11 @@ of previous transactions.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Select the largest unspent output.</p>
 <p>TODO: Add the ability to combine multiple outputs.</p>
@@ -486,11 +538,11 @@ of previous transactions.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Produce a voucher request which specifies the range of acceptable txid&#39;s
 to pay to.</p>
@@ -509,7 +561,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(inverseProbability, fromAddress, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="keyword">function</span>(inverseProbability, fromAddress, cb) {
 
       assert(
         util.isInt(inverseProbability),
@@ -521,34 +573,19 @@ we can continue processing other operations.</p>
         </li>
         
         
-        <li id="section-21">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-              <p>This is a separate fn so that we can push it onto the queue</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
-
-        async.waterfall([</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <p>Get the previous transaction info</p>
+              <p>This is a separate fn so that we can push it onto the queue</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> requestVoucher = <span class="keyword">function</span>(queueCb) {
+
+        async.waterfall([</pre></div></div>
             
         </li>
         
@@ -559,11 +596,11 @@ we can continue processing other operations.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <p>Create the transaction</p>
+              <p>Get the previous transaction info</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
             
         </li>
         
@@ -573,6 +610,21 @@ we can continue processing other operations.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Create the transaction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>We pay the amount for the transaction to the counterparty and send
 the change to ourselves. This is backwards, yes, but we need this
@@ -587,11 +639,11 @@ submitting this to the Bitcoin network yet.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>We need to send change to ourself iff there&#39;s money left over</p>
 <p>TODO: pull this functionality out</p>
@@ -618,34 +670,19 @@ submitting this to the Bitcoin network yet.</p>
         </li>
         
         
-        <li id="section-26">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
-              <p>Sign the transaction</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, waterfallCb)</span> {</span>
-            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, waterfallCb);
-          },</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
-              <p>Decode the signed transaction</p>
+              <p>Sign the transaction</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(transactionHex, waterfallCb) {
+            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, waterfallCb);
+          },</pre></div></div>
             
         </li>
         
@@ -655,6 +692,21 @@ submitting this to the Bitcoin network yet.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Decode the signed transaction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Make sure Bitcoin-QT signed the transaction properly.</p>
 <p>TODO: would this ever fail?</p>
@@ -669,26 +721,11 @@ submitting this to the Bitcoin network yet.</p>
             client.cmd(
               <span class="string">'decoderawtransaction'</span>,
               signed.hex,
-              <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
+              <span class="keyword">function</span>(err, transactionJson) {
                 waterfallCb(err, signed, transactionJson);
               }
             );
           },</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-29">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
-              </div>
-              <p>Store the decoded transaction</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, transactionJson, waterfallCb)</span> {</span></pre></div></div>
             
         </li>
         
@@ -698,6 +735,21 @@ submitting this to the Bitcoin network yet.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Store the decoded transaction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, transactionJson, waterfallCb) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>This is just a sanity check specific to this implementation</p>
 
@@ -714,11 +766,11 @@ submitting this to the Bitcoin network yet.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>The start of the target range is the txid minus a random offset</p>
 
@@ -734,11 +786,11 @@ submitting this to the Bitcoin network yet.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Store the target as a JSON object.  We OVERWRITE the previous
 target -- it&#39;s now invalid.  Why?  If we received a cashable
@@ -757,11 +809,11 @@ have one target open at a time.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Success</p>
 
@@ -778,11 +830,11 @@ have one target open at a time.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Wait for a little before we free up the queue.  This gives use a
 time window to get paid before we being our next operation.</p>
@@ -797,11 +849,11 @@ time window to get paid before we being our next operation.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>The function that gets run when this gets popped off the queue is
 actually a no-op.  We manually call cb from inside the queued function,
@@ -809,17 +861,17 @@ so it&#39;s fine.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      queue.push(requestVoucher, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>});
+            <div class="content"><div class='highlight'><pre>      queue.push(requestVoucher, <span class="keyword">function</span>() {});
     };</pre></div></div>
             
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Create a voucher.</p>
 <ul>
@@ -831,16 +883,16 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(destinationAddress, targetSerialized, cb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="keyword">function</span>(destinationAddress, targetSerialized, cb) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Check the inputs</p>
 
@@ -851,11 +903,11 @@ On success, we call cb(null, transactionHex)</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Decode the target.  If we get an error, the target is invalid.</p>
 
@@ -872,11 +924,11 @@ On success, we call cb(null, transactionHex)</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>We only create vouchers for exactly AMOUNT Satoshis</p>
 
@@ -890,11 +942,11 @@ On success, we call cb(null, transactionHex)</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>We can&#39;t pay ourselves using this method</p>
 
@@ -909,34 +961,19 @@ On success, we call cb(null, transactionHex)</p>
         </li>
         
         
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p>This is a separate fn so we can push it onto the queue</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
-
-        async.waterfall([</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>Get my previous tx info and balance</p>
+              <p>This is a separate fn so we can push it onto the queue</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> createVoucher = <span class="keyword">function</span>(queueCb) {
+
+        async.waterfall([</pre></div></div>
             
         </li>
         
@@ -947,12 +984,11 @@ On success, we call cb(null, transactionHex)</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
-              <p>Ask the client to create this transaction.  This doesn&#39;t actually send anything, it just
-creates a binary string representing the transaction.</p>
+              <p>Get my previous tx info and balance</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          getPrevious,</pre></div></div>
             
         </li>
         
@@ -962,6 +998,22 @@ creates a binary string representing the transaction.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Ask the client to create this transaction.  This doesn&#39;t actually send anything, it just
+creates a binary string representing the transaction.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>Make sure we have enough money</p>
 
@@ -975,11 +1027,11 @@ creates a binary string representing the transaction.</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>Our payment to the destination is the actual voucher.  We must also return the money paid
 in the original transaction back to the payee.  So, we pay double the amount to the
@@ -993,11 +1045,11 @@ destination address</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>We need to send change to ourself iff there&#39;s money left over</p>
 
@@ -1011,11 +1063,11 @@ destination address</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>Randomly guess a number in the target range</p>
 
@@ -1030,11 +1082,11 @@ destination address</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Pad the guessed transaction ID with zeros</p>
 
@@ -1044,30 +1096,11 @@ destination address</p>
               previousTxidGuess = <span class="string">'0'</span> + previousTxidGuess;
             }
 
-            <span class="keyword">var</span> waterfallTranslator = <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
+            <span class="keyword">var</span> waterfallTranslator = <span class="keyword">function</span>(err, transactionHex) {
               waterfallCb(err, transactionHex, previousTxidGuess);
             }
 
             client.cmd(<span class="string">'createrawtransaction'</span>, [{<span class="string">'txid'</span>: previousTxidGuess, <span class="string">'vout'</span>: target.vout}, {<span class="string">'txid'</span>: previous.txid, <span class="string">'vout'</span>: previous.vout}], outputs, waterfallTranslator);
-          },</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-49">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
-              </div>
-              <p>The transaction was successfully created.  Now sign it.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, previousTxidGuess, waterfallCb)</span> {</span>
-            <span class="keyword">var</span> scriptPubKey = script.addressToScript(addressHex);
-
-            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, [{<span class="string">'txid'</span>: previousTxidGuess,<span class="string">'vout'</span>: target.vout, <span class="string">'scriptPubKey'</span>: scriptPubKey, <span class="string">'redeemScript'</span>: privateKey}], waterfallCb);
           },</pre></div></div>
             
         </li>
@@ -1079,11 +1112,15 @@ destination address</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
-              <p>We signed the transaction, now invalidate the current target</p>
+              <p>The transaction was successfully created.  Now sign it.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(transactionHex, previousTxidGuess, waterfallCb) {
+            <span class="keyword">var</span> scriptPubKey = script.addressToScript(addressHex);
+
+            client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, [{<span class="string">'txid'</span>: previousTxidGuess,<span class="string">'vout'</span>: target.vout, <span class="string">'scriptPubKey'</span>: scriptPubKey, <span class="string">'redeemScript'</span>: privateKey}], waterfallCb);
+          },</pre></div></div>
             
         </li>
         
@@ -1094,11 +1131,11 @@ destination address</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
-              <p>I think that this means that the transaction is potentially valid. TODO: verify</p>
+              <p>We signed the transaction, now invalidate the current target</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            assert(signed.complete);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -1108,6 +1145,21 @@ destination address</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>I think that this means that the transaction is potentially valid. TODO: verify</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            assert(signed.complete);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>Since we may send this voucher out and it&#39;s using the same prevout
 as the current  target, we must declare the current target
@@ -1128,11 +1180,11 @@ invalid.</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>Cash in a voucher.</p>
 <ul>
@@ -1145,27 +1197,7 @@ If the voucher is valid, call cb(null, cashed)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-54">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
-              </div>
-              <p>verify the txid</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
-
-        <span class="keyword">if</span>(err) {
-          cb(<span class="string">'Error decoding transaction: '</span> + err);
-          <span class="keyword">return</span>;
-        }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="keyword">function</span>(transactionHex, cb) {</pre></div></div>
             
         </li>
         
@@ -1175,6 +1207,26 @@ If the voucher is valid, call cb(null, cashed)</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>verify the txid</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, transactionJson) {
+
+        <span class="keyword">if</span>(err) {
+          cb(<span class="string">'Error decoding transaction: '</span> + err);
+          <span class="keyword">return</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>This checks the 0th output of the transaction, and makes sure that it is paid to an
 address within the targetrange that we&#39;ve specified.
@@ -1190,11 +1242,11 @@ TODO: remove this check by looping over vouts</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>TODO: other vouts work too, maybe even add them up?
 We expect double the amount, because we&#39;re getting back the amount we paid</p>
@@ -1208,11 +1260,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>This is the txid that the payer guessed</p>
 
@@ -1225,11 +1277,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>validate that toAddress isn&#39;t our own address</p>
 
@@ -1243,11 +1295,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>If there&#39;s no target set up, we can&#39;t be paid</p>
 
@@ -1261,11 +1313,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-60">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>previous txid is lower than this target, no good</p>
 
@@ -1279,11 +1331,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-61">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>previous txid is higher than this target, no good</p>
 
@@ -1300,11 +1352,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-62">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>Wrong guess. The voucher was valid but not cashable</p>
 
@@ -1318,11 +1370,11 @@ We expect double the amount, because we&#39;re getting back the amount we paid</
         </li>
         
         
-        <li id="section-63">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>Destroy the target.  Otherwise the payer could re-guess with a higher probability of
 correctness</p>
@@ -1336,28 +1388,28 @@ correctness</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>The voucher was valid and cashable.  Cash it!  #getmoney</p>
 <p>First, submit the setup transaction</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="keyword">function</span>(err, txid) {
           <span class="keyword">if</span>(err) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-65">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>We couldn&#39;t submit the setup transaction?  Yuck.  Bitcoin-Qt closed, maybe?</p>
 
@@ -1370,11 +1422,11 @@ correctness</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>Now that we&#39;ve used this target, get rid of it</p>
 
@@ -1385,17 +1437,17 @@ correctness</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>TODO: how do we tell the difference between invalid and uncashable if this call fails?</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+            <div class="content"><div class='highlight'><pre>          client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, txid) {
             <span class="keyword">if</span>(err) {
               cb(<span class="string">'Error sending real transaction: '</span> + err);
             } <span class="keyword">else</span> {
@@ -1405,6 +1457,43 @@ correctness</p>
         });
       });
     };
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>Return an account with the given parameters.</p>
+<ul>
+<li>address: string</li>
+<li>privateKey: string</li>
+</ul>
+<p>If creation succeeds, call cb(err)
+If creation succeeds, call cb(null, account)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.getAccount = <span class="keyword">function</span>(address, privateKey, cb) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>This implementation actually always succeeds and returns synchronously</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cb(<span class="literal">null</span>, <span class="keyword">new</span> Account(address, privateKey));
   };
 };
 

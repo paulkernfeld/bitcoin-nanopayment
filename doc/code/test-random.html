@@ -39,6 +39,16 @@
               </a>
             
               
+              <a class="source" href="rpc-client.html">
+                rpc-client.js
+              </a>
+            
+              
+              <a class="source" href="rpc-server.html">
+                rpc-server.js
+              </a>
+            
+              
               <a class="source" href="script.html">
                 script.js
               </a>
@@ -49,8 +59,23 @@
               </a>
             
               
+              <a class="source" href="test-jayson.html">
+                test-jayson.js
+              </a>
+            
+              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-lib.html">
+                test-payment-lib.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-rpc.html">
+                test-payment-rpc.js
               </a>
             
               
@@ -149,7 +174,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>{
-  <span class="keyword">var</span> testUniformRandom = <span class="function"><span class="keyword">function</span><span class="params">(n)</span> {</span>
+  <span class="keyword">var</span> testUniformRandom = <span class="keyword">function</span>(n) {
     <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) {
       <span class="keyword">var</span> random = paymentBtc.cryptoRandom(n);
       assert(random &gt;= <span class="number">0</span>);

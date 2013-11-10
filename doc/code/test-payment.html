@@ -39,6 +39,16 @@
               </a>
             
               
+              <a class="source" href="rpc-client.html">
+                rpc-client.js
+              </a>
+            
+              
+              <a class="source" href="rpc-server.html">
+                rpc-server.js
+              </a>
+            
+              
               <a class="source" href="script.html">
                 script.js
               </a>
@@ -49,8 +59,23 @@
               </a>
             
               
+              <a class="source" href="test-jayson.html">
+                test-jayson.js
+              </a>
+            
+              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-lib.html">
+                test-payment-lib.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-rpc.html">
+                test-payment-rpc.js
               </a>
             
               
@@ -151,15 +176,13 @@
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>This test creates two accounts in the user&#39;s wallet, and sends a nanopayment
-from one to the other.</p>
-<p>Load configs</p>
+from &quot;source&quot; to &quot;destination&quot;.</p>
+<p>Send a transaction from the source address to the destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> clientConfigText = fs.readFileSync(<span class="string">'config/client.json'</span>, <span class="string">'utf8'</span>);
-<span class="keyword">var</span> clientConfig = JSON.parse(clientConfigText);
-<span class="keyword">var</span> accountConfigText = fs.readFileSync(<span class="string">'config/test-accounts.json'</span>, <span class="string">'utf8'</span>);
-<span class="keyword">var</span> accountConfig = JSON.parse(accountConfigText);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.test = <span class="keyword">function</span>(client, accountConfig, testCb) {
+  <span class="keyword">var</span> destinationAddress = accountConfig.destinationAddress;</pre></div></div>
             
         </li>
         
@@ -170,12 +193,13 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Send a transaction from the source address to the destination address</p>
+              <p>Make the source account</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>{
-  <span class="keyword">var</span> client = <span class="keyword">new</span> Client(clientConfig);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  client.getAccount(
+    accountConfig.sourceAddress,
+    accountConfig.sourcePrivateKey,</pre></div></div>
             
         </li>
         
@@ -186,23 +210,17 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Make two new accounts</p>
+              <p>Make the destination account</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> sourceAccount = <span class="keyword">new</span> client.Account(
-    accountConfig.sourceAddress,
-    accountConfig.sourcePrivateKey
-  );
-  
-  <span class="keyword">var</span> destinationAccount = <span class="keyword">new</span> client.Account(
-    accountConfig.destinationAddress,
-    accountConfig.destinationPrivateKey
-  );
-  
-  <span class="keyword">var</span> destinationAddress = accountConfig.destinationAddress;
-
-  async.waterfall([</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(err, sourceAccount, cb) {
+      assert(!err, util.inspect(err));
+      console.log(<span class="string">'Made source account.'</span>);
+      
+      client.getAccount(
+        accountConfig.destinationAddress,
+        accountConfig.destinationPrivateKey,</pre></div></div>
             
         </li>
         
@@ -213,19 +231,15 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>The recipient requests the payment</p>
+              <p>Do the payment sending</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
-      destinationAccount.requestVoucher(
-        <span class="number">1</span>,
-        accountConfig.sourceAddress,
-        <span class="function"><span class="keyword">function</span><span class="params">(err, targetSerialized)</span> {</span>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">function</span>(err, destinationAccount) {
           assert(!err, util.inspect(err));
-          console.log(<span class="string">'Voucher requested.'</span>);
-
-          <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
+          console.log(<span class="string">'Made destination account.'</span>);
+          
+          async.waterfall([</pre></div></div>
             
         </li>
         
@@ -236,14 +250,19 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Make sure the length of the range is 1</p>
+              <p>The recipient requests the payment</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          assert.equal(target.length, <span class="number">1</span>, <span class="string">'Range length must equal 1'</span>);
-          cb(err, targetSerialized);
-        });
-    },</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">function</span>(cb) {
+              destinationAccount.requestVoucher(
+                <span class="number">1</span>,
+                sourceAccount.address,
+                <span class="keyword">function</span>(err, targetSerialized) {
+                  assert(!err, util.inspect(err));
+                  console.log(<span class="string">'Voucher requested.'</span>);
+
+                  <span class="keyword">var</span> target = nanopayments.deserializeTarget(targetSerialized);</pre></div></div>
             
         </li>
         
@@ -254,21 +273,15 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>The payer creates the payment voucher based on the request</p>
+              <p>Make sure the length of the range is 1</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(range, cb)</span> {</span>
-      sourceAccount.createVoucher(
-        destinationAddress,
-        range,
-        <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
-          assert(!err, util.inspect(err));
-          console.log(<span class="string">'Voucher created.'</span>);
-          cb(err, transactionHex);
-        }
-      );
-    },</pre></div></div>
+            <div class="content"><div class='highlight'><pre>                  assert.equal(target.length, <span class="number">1</span>, <span class="string">'Range length must equal 1'</span>);
+                  cb(err, targetSerialized);
+                }
+              );
+            },</pre></div></div>
             
         </li>
         
@@ -279,19 +292,50 @@ from one to the other.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
+              <p>The payer creates the payment voucher based on the request</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">function</span>(range, cb) {
+              sourceAccount.createVoucher(
+                destinationAddress,
+                range,
+                <span class="keyword">function</span>(err, transactionHex) {
+                  assert(!err, util.inspect(err));
+                  console.log(<span class="string">'Voucher created.'</span>);
+                  cb(err, transactionHex);
+                }
+              );
+            },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
               <p>The recipient cashes the payment voucher in</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span>
-      destinationAccount.cashVoucher(transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, cashed)</span> {</span>
-        assert(!err, util.inspect(err));
-        assert(cashed, <span class="string">"The voucher wasn't cashable?"</span>);
-        console.log(<span class="string">'Transaction cashed.'</span>);
-      });
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">function</span>(transactionHex, cb) {
+              destinationAccount.cashVoucher(transactionHex, <span class="keyword">function</span>(err, cashed) {
+                assert(!err, util.inspect(err));
+                assert(cashed, <span class="string">"The voucher wasn't cashable?"</span>);
+                console.log(<span class="string">'Transaction cashed.'</span>);
+                cb(<span class="literal">null</span>);
+              });
+            }
+          ], testCb);
+
+        }
+      );
     }
-  ]);
-}</pre></div></div>
+  );
+};</pre></div></div>
             
         </li>
         

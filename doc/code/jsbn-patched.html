@@ -39,6 +39,16 @@
               </a>
             
               
+              <a class="source" href="rpc-client.html">
+                rpc-client.js
+              </a>
+            
+              
+              <a class="source" href="rpc-server.html">
+                rpc-server.js
+              </a>
+            
+              
               <a class="source" href="script.html">
                 script.js
               </a>
@@ -49,8 +59,23 @@
               </a>
             
               
+              <a class="source" href="test-jayson.html">
+                test-jayson.js
+              </a>
+            
+              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-lib.html">
+                test-payment-lib.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-rpc.html">
+                test-payment-rpc.js
               </a>
             
               
@@ -216,12 +241,13 @@ on values up to 2*hdvalue^2-hdvalue-1 (&lt; 2^31)</p>
     <span class="keyword">var</span> l = <span class="keyword">this</span>[i]&amp;<span class="number">0x7fff</span>;
     <span class="keyword">var</span> h = <span class="keyword">this</span>[i++]&gt;&gt;<span class="number">15</span>;
     <span class="keyword">var</span> m = xh*l+h*xl;
-    l = xl*l+((m&amp;<span class="number">0x7fff</span>)&lt;&lt;<span class="number">15</span>)+w[j]+(c&amp;<span class="number">0x3fffffff</span>);
-    c = (l&gt;&gt;&gt;<span class="number">30</span>)+(m&gt;&gt;&gt;<span class="number">15</span>)+xh*h+(c&gt;&gt;&gt;<span class="number">30</span>);
-    w[j++] = l&amp;<span class="number">0x3fffffff</span>;
+    l = xl*l+((m&amp;<span class="number">0x7fff</span>)&lt;<span class="xml"><span class="tag">&lt;<span class="title">15)+w[j]+(c&amp;0x3fffffff);
+</span>    <span class="attribute">c</span> = (<span class="attribute">l</span>&gt;</span>&gt;&gt;30)+(m&gt;&gt;&gt;15)+xh*h+(c&gt;&gt;&gt;30);
+    w[j++] = l&amp;0x3fffffff;
   }
-  <span class="keyword">return</span> c;
-}</pre></div></div>
+  return c;
+}
+</span></pre></div></div>
             
         </li>
         
@@ -243,33 +269,35 @@ browsers slow down when dealing with 32-bit numbers.</p>
     <span class="keyword">var</span> l = <span class="keyword">this</span>[i]&amp;<span class="number">0x3fff</span>;
     <span class="keyword">var</span> h = <span class="keyword">this</span>[i++]&gt;&gt;<span class="number">14</span>;
     <span class="keyword">var</span> m = xh*l+h*xl;
-    l = xl*l+((m&amp;<span class="number">0x3fff</span>)&lt;&lt;<span class="number">14</span>)+w[j]+c;
-    c = (l&gt;&gt;<span class="number">28</span>)+(m&gt;&gt;<span class="number">14</span>)+xh*h;
-    w[j++] = l&amp;<span class="number">0xfffffff</span>;
+    l = xl*l+((m&amp;<span class="number">0x3fff</span>)&lt;<span class="xml"><span class="tag">&lt;<span class="title">14)+w[j]+c;
+</span>    <span class="attribute">c</span> = (<span class="attribute">l</span>&gt;</span>&gt;28)+(m&gt;&gt;14)+xh*h;
+    w[j++] = l&amp;0xfffffff;
   }
-  <span class="keyword">return</span> c;
+  return c;
 }
-<span class="keyword">if</span>(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName == <span class="string">"Microsoft Internet Explorer"</span>))) {
+if(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName == "Microsoft Internet Explorer"))) {
   exports.BigInteger.prototype.am = am2;
-  dbits = <span class="number">30</span>;
+  dbits = 30;
 }
-<span class="keyword">else</span> <span class="keyword">if</span>(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName != <span class="string">"Netscape"</span>))) {
+else if(j_lm &amp;&amp; (navigator &amp;&amp; (navigator.appName != "Netscape"))) {
   exports.BigInteger.prototype.am = am1;
-  dbits = <span class="number">26</span>;
+  dbits = 26;
 }
-<span class="keyword">else</span> { <span class="comment">// Mozilla/Netscape seems to prefer am3</span>
+else { // Mozilla/Netscape seems to prefer am3
   exports.BigInteger.prototype.am = am3;
-  dbits = <span class="number">28</span>;
+  dbits = 28;
 }
 
 exports.BigInteger.prototype.DB = dbits;
-exports.BigInteger.prototype.DM = ((<span class="number">1</span>&lt;&lt;dbits)-<span class="number">1</span>);
-exports.BigInteger.prototype.DV = (<span class="number">1</span>&lt;&lt;dbits);
+exports.BigInteger.prototype.DM = ((1<span class="tag">&lt;<span class="title">&lt;dbits)-1);
+exports.BigInteger.prototype.DV</span> = (<span class="attribute">1</span>&lt;&lt;<span class="attribute">dbits</span>);
 
-<span class="keyword">var</span> BI_FP = <span class="number">52</span>;
-exports.BigInteger.prototype.FV = Math.pow(<span class="number">2</span>,BI_FP);
-exports.BigInteger.prototype.F1 = BI_FP-dbits;
-exports.BigInteger.prototype.F2 = <span class="number">2</span>*dbits-BI_FP;</pre></div></div>
+<span class="attribute">var</span> <span class="attribute">BI_FP</span> = <span class="attribute">52</span>;
+<span class="attribute">exports.BigInteger.prototype.FV</span> = <span class="attribute">Math.pow</span>(<span class="attribute">2</span>,<span class="attribute">BI_FP</span>);
+<span class="attribute">exports.BigInteger.prototype.F1</span> = <span class="attribute">BI_FP-dbits</span>;
+<span class="attribute">exports.BigInteger.prototype.F2</span> = <span class="attribute">2</span>*<span class="attribute">dbits-BI_FP</span>;
+
+</span></pre></div></div>
             
         </li>
         
@@ -390,21 +418,23 @@ rr = <span class="string">"A"</span>.charCodeAt(<span class="number">0</span>);
     <span class="keyword">if</span>(sh == <span class="number">0</span>)
       <span class="keyword">this</span>[<span class="keyword">this</span>.t++] = x;
     <span class="keyword">else</span> <span class="keyword">if</span>(sh+k &gt; <span class="keyword">this</span>.DB) {
-      <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] |= (x&amp;((<span class="number">1</span>&lt;&lt;(<span class="keyword">this</span>.DB-sh))-<span class="number">1</span>))&lt;&lt;sh;
-      <span class="keyword">this</span>[<span class="keyword">this</span>.t++] = (x&gt;&gt;(<span class="keyword">this</span>.DB-sh));
+      <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] |= (x&amp;((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(this.DB-sh))-1))&lt;&lt;sh;
+</span>      <span class="attribute">this</span>[<span class="attribute">this.t</span>++] = (<span class="attribute">x</span>&gt;</span>&gt;(this.DB-sh));
     }
-    <span class="keyword">else</span>
-      <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] |= x&lt;&lt;sh;
-    sh += k;
-    <span class="keyword">if</span>(sh &gt;= <span class="keyword">this</span>.DB) sh -= <span class="keyword">this</span>.DB;
+    else
+      this[this.t-1] |= x<span class="tag">&lt;<span class="title">&lt;sh;
+</span>    <span class="attribute">sh</span> += <span class="attribute">k</span>;
+    <span class="attribute">if</span>(<span class="attribute">sh</span> &gt;</span>= this.DB) sh -= this.DB;
   }
-  <span class="keyword">if</span>(k == <span class="number">8</span> &amp;&amp; (s[<span class="number">0</span>]&amp;<span class="number">0x80</span>) != <span class="number">0</span>) {
-    <span class="keyword">this</span>.s = -<span class="number">1</span>;
-    <span class="keyword">if</span>(sh &gt; <span class="number">0</span>) <span class="keyword">this</span>[<span class="keyword">this</span>.t-<span class="number">1</span>] |= ((<span class="number">1</span>&lt;&lt;(<span class="keyword">this</span>.DB-sh))-<span class="number">1</span>)&lt;&lt;sh;
-  }
-  <span class="keyword">this</span>.clamp();
-  <span class="keyword">if</span>(mi) exports.BigInteger.ZERO.subTo(<span class="keyword">this</span>,<span class="keyword">this</span>);
-}</pre></div></div>
+  if(k == 8 &amp;&amp; (s[0]&amp;0x80) != 0) {
+    this.s = -1;
+    if(sh &gt; 0) this[this.t-1] |= ((1<span class="tag">&lt;<span class="title">&lt;(this.DB-sh))-1)&lt;&lt;sh;
+</span>  }
+  <span class="attribute">this.clamp</span>();
+  <span class="attribute">if</span>(<span class="attribute">mi</span>) <span class="attribute">exports.BigInteger.ZERO.subTo</span>(<span class="attribute">this</span>,<span class="attribute">this</span>);
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -446,25 +476,27 @@ rr = <span class="string">"A"</span>.charCodeAt(<span class="number">0</span>);
   <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">32</span>) k = <span class="number">5</span>;
   <span class="keyword">else</span> <span class="keyword">if</span>(b == <span class="number">4</span>) k = <span class="number">2</span>;
   <span class="keyword">else</span> <span class="keyword">return</span> <span class="keyword">this</span>.toRadix(b);
-  <span class="keyword">var</span> km = (<span class="number">1</span>&lt;&lt;k)-<span class="number">1</span>, d, m = <span class="literal">false</span>, r = <span class="string">""</span>, i = <span class="keyword">this</span>.t;
-  <span class="keyword">var</span> p = <span class="keyword">this</span>.DB-(i*<span class="keyword">this</span>.DB)%k;
-  <span class="keyword">if</span>(i-- &gt; <span class="number">0</span>) {
-    <span class="keyword">if</span>(p &lt; <span class="keyword">this</span>.DB &amp;&amp; (d = <span class="keyword">this</span>[i]&gt;&gt;p) &gt; <span class="number">0</span>) { m = <span class="literal">true</span>; r = int2char(d); }
-    <span class="keyword">while</span>(i &gt;= <span class="number">0</span>) {
-      <span class="keyword">if</span>(p &lt; k) {
-        d = (<span class="keyword">this</span>[i]&amp;((<span class="number">1</span>&lt;&lt;p)-<span class="number">1</span>))&lt;&lt;(k-p);
-        d |= <span class="keyword">this</span>[--i]&gt;&gt;(p+=<span class="keyword">this</span>.DB-k);
+  <span class="keyword">var</span> km = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">k)-1,</span> <span class="attribute">d</span>, <span class="attribute">m</span> = <span class="attribute">false</span>, <span class="attribute">r</span> = "", <span class="attribute">i</span> = <span class="attribute">this.t</span>;
+  <span class="attribute">var</span> <span class="attribute">p</span> = <span class="attribute">this.DB-</span>(<span class="attribute">i</span>*<span class="attribute">this.DB</span>)%<span class="attribute">k</span>;
+  <span class="attribute">if</span>(<span class="attribute">i--</span> &gt;</span> 0) {
+    if(p <span class="tag">&lt; <span class="attribute">this.DB</span> &amp;&amp; (<span class="attribute">d</span> = <span class="attribute">this</span>[<span class="attribute">i</span>]&gt;</span>&gt;p) &gt; 0) { m = true; r = int2char(d); }
+    while(i &gt;= 0) {
+      if(p <span class="tag">&lt; <span class="attribute">k</span>) {
+        <span class="attribute">d</span> = (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;((<span class="attribute">1</span>&lt;&lt;<span class="attribute">p</span>)<span class="attribute">-1</span>))&lt;&lt;(<span class="attribute">k-p</span>);
+        <span class="attribute">d</span> |= <span class="attribute">this</span>[<span class="attribute">--i</span>]&gt;</span>&gt;(p+=this.DB-k);
       }
-      <span class="keyword">else</span> {
-        d = (<span class="keyword">this</span>[i]&gt;&gt;(p-=k))&amp;km;
-        <span class="keyword">if</span>(p &lt;= <span class="number">0</span>) { p += <span class="keyword">this</span>.DB; --i; }
+      else {
+        d = (this[i]&gt;&gt;(p-=k))&amp;km;
+        if(p <span class="tag">&lt;<span class="title">=</span> <span class="attribute">0</span>) { <span class="attribute">p</span> += <span class="attribute">this.DB</span>; <span class="attribute">--i</span>; }
       }
-      <span class="keyword">if</span>(d &gt; <span class="number">0</span>) m = <span class="literal">true</span>;
-      <span class="keyword">if</span>(m) r += int2char(d);
+      <span class="attribute">if</span>(<span class="attribute">d</span> &gt;</span> 0) m = true;
+      if(m) r += int2char(d);
     }
   }
-  <span class="keyword">return</span> m?r:<span class="string">"0"</span>;
-}</pre></div></div>
+  return m?r:"0";
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -616,18 +648,20 @@ rr = <span class="string">"A"</span>.charCodeAt(<span class="number">0</span>);
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnpLShiftTo</span><span class="params">(n,r)</span> {</span>
   <span class="keyword">var</span> bs = n%<span class="keyword">this</span>.DB;
   <span class="keyword">var</span> cbs = <span class="keyword">this</span>.DB-bs;
-  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;&lt;cbs)-<span class="number">1</span>;
-  <span class="keyword">var</span> ds = Math.floor(n/<span class="keyword">this</span>.DB), c = (<span class="keyword">this</span>.s&lt;&lt;bs)&amp;<span class="keyword">this</span>.DM, i;
-  <span class="keyword">for</span>(i = <span class="keyword">this</span>.t-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) {
-    r[i+ds+<span class="number">1</span>] = (<span class="keyword">this</span>[i]&gt;&gt;cbs)|c;
-    c = (<span class="keyword">this</span>[i]&amp;bm)&lt;&lt;bs;
-  }
-  <span class="keyword">for</span>(i = ds-<span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) r[i] = <span class="number">0</span>;
+  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">cbs)-1;
+</span>  <span class="attribute">var</span> <span class="attribute">ds</span> = <span class="attribute">Math.floor</span>(<span class="attribute">n</span>/<span class="attribute">this.DB</span>), <span class="attribute">c</span> = (<span class="attribute">this.s</span>&lt;&lt;<span class="attribute">bs</span>)&amp;<span class="attribute">this.DM</span>, <span class="attribute">i</span>;
+  <span class="attribute">for</span>(<span class="attribute">i</span> = <span class="attribute">this.t-1</span>; <span class="attribute">i</span> &gt;</span>= 0; --i) {
+    r[i+ds+1] = (this[i]&gt;&gt;cbs)|c;
+    c = (this[i]&amp;bm)<span class="tag">&lt;<span class="title">&lt;bs;
+</span>  }
+  <span class="attribute">for</span>(<span class="attribute">i</span> = <span class="attribute">ds-1</span>; <span class="attribute">i</span> &gt;</span>= 0; --i) r[i] = 0;
   r[ds] = c;
-  r.t = <span class="keyword">this</span>.t+ds+<span class="number">1</span>;
-  r.s = <span class="keyword">this</span>.s;
+  r.t = this.t+ds+1;
+  r.s = this.s;
   r.clamp();
-}</pre></div></div>
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -648,16 +682,18 @@ rr = <span class="string">"A"</span>.charCodeAt(<span class="number">0</span>);
   <span class="keyword">if</span>(ds &gt;= <span class="keyword">this</span>.t) { r.t = <span class="number">0</span>; <span class="keyword">return</span>; }
   <span class="keyword">var</span> bs = n%<span class="keyword">this</span>.DB;
   <span class="keyword">var</span> cbs = <span class="keyword">this</span>.DB-bs;
-  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;&lt;bs)-<span class="number">1</span>;
-  r[<span class="number">0</span>] = <span class="keyword">this</span>[ds]&gt;&gt;bs;
-  <span class="keyword">for</span>(<span class="keyword">var</span> i = ds+<span class="number">1</span>; i &lt; <span class="keyword">this</span>.t; ++i) {
-    r[i-ds-<span class="number">1</span>] |= (<span class="keyword">this</span>[i]&amp;bm)&lt;&lt;cbs;
-    r[i-ds] = <span class="keyword">this</span>[i]&gt;&gt;bs;
+  <span class="keyword">var</span> bm = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">bs)-1;
+</span>  <span class="attribute">r</span>[<span class="attribute">0</span>] = <span class="attribute">this</span>[<span class="attribute">ds</span>]&gt;</span>&gt;bs;
+  for(var i = ds+1; i <span class="tag">&lt; <span class="attribute">this.t</span>; ++<span class="attribute">i</span>) {
+    <span class="attribute">r</span>[<span class="attribute">i-ds-1</span>] |= (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;<span class="attribute">bm</span>)&lt;&lt;<span class="attribute">cbs</span>;
+    <span class="attribute">r</span>[<span class="attribute">i-ds</span>] = <span class="attribute">this</span>[<span class="attribute">i</span>]&gt;</span>&gt;bs;
   }
-  <span class="keyword">if</span>(bs &gt; <span class="number">0</span>) r[<span class="keyword">this</span>.t-ds-<span class="number">1</span>] |= (<span class="keyword">this</span>.s&amp;bm)&lt;&lt;cbs;
-  r.t = <span class="keyword">this</span>.t-ds;
-  r.clamp();
-}</pre></div></div>
+  if(bs &gt; 0) r[this.t-ds-1] |= (this.s&amp;bm)<span class="tag">&lt;<span class="title">&lt;cbs;
+</span>  <span class="attribute">r.t</span> = <span class="attribute">this.t-ds</span>;
+  <span class="attribute">r.clamp</span>();
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -789,18 +825,19 @@ r != q, this != m.  q or r may be null.</p>
   <span class="keyword">var</span> ys = y.t;
   <span class="keyword">var</span> y0 = y[ys-<span class="number">1</span>];
   <span class="keyword">if</span>(y0 == <span class="number">0</span>) <span class="keyword">return</span>;
-  <span class="keyword">var</span> yt = y0*(<span class="number">1</span>&lt;&lt;<span class="keyword">this</span>.F1)+((ys&gt;<span class="number">1</span>)?y[ys-<span class="number">2</span>]&gt;&gt;<span class="keyword">this</span>.F2:<span class="number">0</span>);
-  <span class="keyword">var</span> d1 = <span class="keyword">this</span>.FV/yt, d2 = (<span class="number">1</span>&lt;&lt;<span class="keyword">this</span>.F1)/yt, e = <span class="number">1</span>&lt;&lt;<span class="keyword">this</span>.F2;
-  <span class="keyword">var</span> i = r.t, j = i-ys, t = (q==<span class="literal">null</span>)?nbi():q;
-  y.dlShiftTo(j,t);
-  <span class="keyword">if</span>(r.compareTo(t) &gt;= <span class="number">0</span>) {
-    r[r.t++] = <span class="number">1</span>;
+  <span class="keyword">var</span> yt = y0*(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">this.F1)+((ys</span>&gt;</span>1)?y[ys-2]&gt;&gt;this.F2:0);
+  var d1 = this.FV/yt, d2 = (1<span class="tag">&lt;<span class="title">&lt;this.F1)</span>/<span class="attribute">yt</span>, <span class="attribute">e</span> = <span class="attribute">1</span>&lt;&lt;<span class="attribute">this.F2</span>;
+  <span class="attribute">var</span> <span class="attribute">i</span> = <span class="attribute">r.t</span>, <span class="attribute">j</span> = <span class="attribute">i-ys</span>, <span class="attribute">t</span> = (<span class="attribute">q</span>=<span class="value">=null)?nbi():q;</span>
+  <span class="attribute">y.dlShiftTo</span>(<span class="attribute">j</span>,<span class="attribute">t</span>);
+  <span class="attribute">if</span>(<span class="attribute">r.compareTo</span>(<span class="attribute">t</span>) &gt;</span>= 0) {
+    r[r.t++] = 1;
     r.subTo(t,r);
   }
   exports.BigInteger.ONE.dlShiftTo(ys,t);
-  t.subTo(y,y);	<span class="comment">// "negative" y so we can replace sub with am later</span>
-  <span class="keyword">while</span>(y.t &lt; ys) y[y.t++] = <span class="number">0</span>;
-  <span class="keyword">while</span>(--j &gt;= <span class="number">0</span>) {</pre></div></div>
+  t.subTo(y,y);	// "negative" y so we can replace sub with am later
+  while(y.t <span class="tag">&lt; <span class="attribute">ys</span>) <span class="attribute">y</span>[<span class="attribute">y.t</span>++] = <span class="attribute">0</span>;
+  <span class="attribute">while</span>(<span class="attribute">--j</span> &gt;</span>= 0) {
+</span></pre></div></div>
             
         </li>
         
@@ -962,9 +999,11 @@ assumes 16 &lt; DB &lt;= 32 and assumes ability to handle 48-bit ints</p>
   <span class="keyword">this</span>.mp = m.invDigit();
   <span class="keyword">this</span>.mpl = <span class="keyword">this</span>.mp&amp;<span class="number">0x7fff</span>;
   <span class="keyword">this</span>.mph = <span class="keyword">this</span>.mp&gt;&gt;<span class="number">15</span>;
-  <span class="keyword">this</span>.um = (<span class="number">1</span>&lt;&lt;(m.DB-<span class="number">15</span>))-<span class="number">1</span>;
-  <span class="keyword">this</span>.mt2 = <span class="number">2</span>*m.t;
-}</pre></div></div>
+  <span class="keyword">this</span>.um = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(m.DB-15))-1;
+</span>  <span class="attribute">this.mt2</span> = <span class="attribute">2</span>*<span class="attribute">m.t</span>;
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -1039,7 +1078,8 @@ assumes 16 &lt; DB &lt;= 32 and assumes ability to handle 48-bit ints</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> j = x[i]&amp;<span class="number">0x7fff</span>;
-    <span class="keyword">var</span> u0 = (j*<span class="keyword">this</span>.mpl+(((j*<span class="keyword">this</span>.mph+(x[i]&gt;&gt;<span class="number">15</span>)*<span class="keyword">this</span>.mpl)&amp;<span class="keyword">this</span>.um)&lt;&lt;<span class="number">15</span>))&amp;x.DM;</pre></div></div>
+    <span class="keyword">var</span> u0 = (j*<span class="keyword">this</span>.mpl+(((j*<span class="keyword">this</span>.mph+(x[i]&gt;&gt;<span class="number">15</span>)*<span class="keyword">this</span>.mpl)&amp;<span class="keyword">this</span>.um)&lt;<span class="xml"><span class="tag">&lt;<span class="title">15))&amp;x.DM;
+</span></span></pre></div></div>
             
         </li>
         
@@ -1147,11 +1187,13 @@ Montgomery.prototype.sqrTo = montSqrTo;</pre></div></div>
   g.copyTo(r);
   <span class="keyword">while</span>(--i &gt;= <span class="number">0</span>) {
     z.sqrTo(r,r2);
-    <span class="keyword">if</span>((e&amp;(<span class="number">1</span>&lt;&lt;i)) &gt; <span class="number">0</span>) z.mulTo(r2,g,r);
-    <span class="keyword">else</span> { <span class="keyword">var</span> t = r; r = r2; r2 = t; }
+    <span class="keyword">if</span>((e&amp;(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">i))</span> &gt;</span> 0) z.mulTo(r2,g,r);
+    else { var t = r; r = r2; r2 = t; }
   }
-  <span class="keyword">return</span> z.revert(r);
-}</pre></div></div>
+  return z.revert(r);
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -1299,8 +1341,10 @@ Version 1.2: square() API, isProbablePrime fix</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> ((<span class="keyword">this</span>[<span class="number">1</span>]&amp;((<span class="number">1</span>&lt;&lt;(<span class="number">32</span>-<span class="keyword">this</span>.DB))-<span class="number">1</span>))&lt;&lt;<span class="keyword">this</span>.DB)|<span class="keyword">this</span>[<span class="number">0</span>];
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">return</span> ((<span class="keyword">this</span>[<span class="number">1</span>]&amp;((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(32-this.DB))-1))&lt;&lt;this.DB)|this[0];
+}
+
+</span></span></pre></div></div>
             
         </li>
         
@@ -1315,7 +1359,9 @@ Version 1.2: square() API, isProbablePrime fix</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnByteValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;&lt;<span class="number">24</span>)&gt;&gt;<span class="number">24</span>; }</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnByteValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;<span class="xml"><span class="tag">&lt;<span class="title">24)</span>&gt;</span>&gt;24; }
+
+</span></pre></div></div>
             
         </li>
         
@@ -1330,7 +1376,9 @@ Version 1.2: square() API, isProbablePrime fix</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnShortValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;&lt;<span class="number">16</span>)&gt;&gt;<span class="number">16</span>; }</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnShortValue</span><span class="params">()</span> {</span> <span class="keyword">return</span> (<span class="keyword">this</span>.t==<span class="number">0</span>)?<span class="keyword">this</span>.s:(<span class="keyword">this</span>[<span class="number">0</span>]&lt;<span class="xml"><span class="tag">&lt;<span class="title">16)</span>&gt;</span>&gt;16; }
+
+</span></pre></div></div>
             
         </li>
         
@@ -1491,10 +1539,12 @@ Version 1.2: square() API, isProbablePrime fix</p>
             <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> x = <span class="keyword">new</span> Array(), t = a&amp;<span class="number">7</span>;
     x.length = (a&gt;&gt;<span class="number">3</span>)+<span class="number">1</span>;
     b.nextBytes(x);
-    <span class="keyword">if</span>(t &gt; <span class="number">0</span>) x[<span class="number">0</span>] &amp;= ((<span class="number">1</span>&lt;&lt;t)-<span class="number">1</span>); <span class="keyword">else</span> x[<span class="number">0</span>] = <span class="number">0</span>;
-    <span class="keyword">this</span>.fromString(x,<span class="number">256</span>);
+    <span class="keyword">if</span>(t &gt; <span class="number">0</span>) x[<span class="number">0</span>] &amp;= ((<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">t)-1);</span> <span class="attribute">else</span> <span class="attribute">x</span>[<span class="attribute">0</span>] = <span class="attribute">0</span>;
+    <span class="attribute">this.fromString</span>(<span class="attribute">x</span>,<span class="attribute">256</span>);
   }
-}</pre></div></div>
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -1515,27 +1565,29 @@ Version 1.2: square() API, isProbablePrime fix</p>
   <span class="keyword">var</span> p = <span class="keyword">this</span>.DB-(i*<span class="keyword">this</span>.DB)%<span class="number">8</span>, d, k = <span class="number">0</span>;
   <span class="keyword">if</span>(i-- &gt; <span class="number">0</span>) {
     <span class="keyword">if</span>(p &lt; <span class="keyword">this</span>.DB &amp;&amp; (d = <span class="keyword">this</span>[i]&gt;&gt;p) != (<span class="keyword">this</span>.s&amp;<span class="keyword">this</span>.DM)&gt;&gt;p)
-      r[k++] = d|(<span class="keyword">this</span>.s&lt;&lt;(<span class="keyword">this</span>.DB-p));
-    <span class="keyword">while</span>(i &gt;= <span class="number">0</span>) {
-      <span class="keyword">if</span>(p &lt; <span class="number">8</span>) {
-        d = (<span class="keyword">this</span>[i]&amp;((<span class="number">1</span>&lt;&lt;p)-<span class="number">1</span>))&lt;&lt;(<span class="number">8</span>-p);
-        d |= <span class="keyword">this</span>[--i]&gt;&gt;(p+=<span class="keyword">this</span>.DB-<span class="number">8</span>);
+      r[k++] = d|(<span class="keyword">this</span>.s&lt;<span class="xml"><span class="tag">&lt;<span class="title">(this.DB-p));
+</span>    <span class="attribute">while</span>(<span class="attribute">i</span> &gt;</span>= 0) {
+      if(p <span class="tag">&lt; <span class="attribute">8</span>) {
+        <span class="attribute">d</span> = (<span class="attribute">this</span>[<span class="attribute">i</span>]&amp;((<span class="attribute">1</span>&lt;&lt;<span class="attribute">p</span>)<span class="attribute">-1</span>))&lt;&lt;(<span class="attribute">8-p</span>);
+        <span class="attribute">d</span> |= <span class="attribute">this</span>[<span class="attribute">--i</span>]&gt;</span>&gt;(p+=this.DB-8);
       }
-      <span class="keyword">else</span> {
-        d = (<span class="keyword">this</span>[i]&gt;&gt;(p-=<span class="number">8</span>))&amp;<span class="number">0xff</span>;
-        <span class="keyword">if</span>(p &lt;= <span class="number">0</span>) { p += <span class="keyword">this</span>.DB; --i; }
+      else {
+        d = (this[i]&gt;&gt;(p-=8))&amp;0xff;
+        if(p <span class="tag">&lt;<span class="title">=</span> <span class="attribute">0</span>) { <span class="attribute">p</span> += <span class="attribute">this.DB</span>; <span class="attribute">--i</span>; }
       }
-      <span class="keyword">if</span>((d&amp;<span class="number">0x80</span>) != <span class="number">0</span>) d |= -<span class="number">256</span>;
-      <span class="keyword">if</span>(k == <span class="number">0</span> &amp;&amp; (<span class="keyword">this</span>.s&amp;<span class="number">0x80</span>) != (d&amp;<span class="number">0x80</span>)) ++k;
-      <span class="keyword">if</span>(k &gt; <span class="number">0</span> || d != <span class="keyword">this</span>.s) r[k++] = d;
+      <span class="attribute">if</span>((<span class="attribute">d</span>&amp;<span class="attribute">0x80</span>) != <span class="attribute">0</span>) <span class="attribute">d</span> |= <span class="attribute">-256</span>;
+      <span class="attribute">if</span>(<span class="attribute">k</span> =<span class="value">=</span> <span class="attribute">0</span> &amp;&amp; (<span class="attribute">this.s</span>&amp;<span class="attribute">0x80</span>) != (<span class="attribute">d</span>&amp;<span class="attribute">0x80</span>)) ++<span class="attribute">k</span>;
+      <span class="attribute">if</span>(<span class="attribute">k</span> &gt;</span> 0 || d != this.s) r[k++] = d;
     }
   }
-  <span class="keyword">return</span> r;
+  return r;
 }
 
-<span class="function"><span class="keyword">function</span> <span class="title">bnEquals</span><span class="params">(a)</span> {</span> <span class="keyword">return</span>(<span class="keyword">this</span>.compareTo(a)==<span class="number">0</span>); }
-<span class="function"><span class="keyword">function</span> <span class="title">bnMin</span><span class="params">(a)</span> {</span> <span class="keyword">return</span>(<span class="keyword">this</span>.compareTo(a)&lt;<span class="number">0</span>)?<span class="keyword">this</span>:a; }
-<span class="function"><span class="keyword">function</span> <span class="title">bnMax</span><span class="params">(a)</span> {</span> <span class="keyword">return</span>(<span class="keyword">this</span>.compareTo(a)&gt;<span class="number">0</span>)?<span class="keyword">this</span>:a; }</pre></div></div>
+function bnEquals(a) { return(this.compareTo(a)==0); }
+function bnMin(a) { return(this.compareTo(a)<span class="tag">&lt;<span class="title">0)?this:a;</span> }
+<span class="attribute">function</span> <span class="attribute">bnMax</span>(<span class="attribute">a</span>) { <span class="attribute">return</span>(<span class="attribute">this.compareTo</span>(<span class="attribute">a</span>)&gt;</span>0)?this:a; }
+
+</span></pre></div></div>
             
         </li>
         
@@ -1788,8 +1840,10 @@ Version 1.2: square() API, isProbablePrime fix</p>
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">bnTestBit</span><span class="params">(n)</span> {</span>
   <span class="keyword">var</span> j = Math.floor(n/<span class="keyword">this</span>.DB);
   <span class="keyword">if</span>(j &gt;= <span class="keyword">this</span>.t) <span class="keyword">return</span>(<span class="keyword">this</span>.s!=<span class="number">0</span>);
-  <span class="keyword">return</span>((<span class="keyword">this</span>[j]&amp;(<span class="number">1</span>&lt;&lt;(n%<span class="keyword">this</span>.DB)))!=<span class="number">0</span>);
-}</pre></div></div>
+  <span class="keyword">return</span>((<span class="keyword">this</span>[j]&amp;(<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">(n%this.DB)))!=0);
+}
+
+</span></span></pre></div></div>
             
         </li>
         
@@ -2283,47 +2337,49 @@ Barrett.prototype.sqrTo = barrettSqrTo;</pre></div></div>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> g = <span class="keyword">new</span> Array(), n = <span class="number">3</span>, k1 = k-<span class="number">1</span>, km = (<span class="number">1</span>&lt;&lt;k)-<span class="number">1</span>;
-  g[<span class="number">1</span>] = z.convert(<span class="keyword">this</span>);
-  <span class="keyword">if</span>(k &gt; <span class="number">1</span>) {
-    <span class="keyword">var</span> g2 = nbi();
-    z.sqrTo(g[<span class="number">1</span>],g2);
-    <span class="keyword">while</span>(n &lt;= km) {
-      g[n] = nbi();
-      z.mulTo(g2,g[n-<span class="number">2</span>],g[n]);
-      n += <span class="number">2</span>;
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> g = <span class="keyword">new</span> Array(), n = <span class="number">3</span>, k1 = k-<span class="number">1</span>, km = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">k)-1;
+</span>  <span class="attribute">g</span>[<span class="attribute">1</span>] = <span class="attribute">z.convert</span>(<span class="attribute">this</span>);
+  <span class="attribute">if</span>(<span class="attribute">k</span> &gt;</span> 1) {
+    var g2 = nbi();
+    z.sqrTo(g[1],g2);
+    while(n <span class="tag">&lt;<span class="title">=</span> <span class="attribute">km</span>) {
+      <span class="attribute">g</span>[<span class="attribute">n</span>] = <span class="attribute">nbi</span>();
+      <span class="attribute">z.mulTo</span>(<span class="attribute">g2</span>,<span class="attribute">g</span>[<span class="attribute">n-2</span>],<span class="attribute">g</span>[<span class="attribute">n</span>]);
+      <span class="attribute">n</span> += <span class="attribute">2</span>;
     }
   }
 
-  <span class="keyword">var</span> j = e.t-<span class="number">1</span>, w, is1 = <span class="literal">true</span>, r2 = nbi(), t;
-  i = nbits(e[j])-<span class="number">1</span>;
-  <span class="keyword">while</span>(j &gt;= <span class="number">0</span>) {
-    <span class="keyword">if</span>(i &gt;= k1) w = (e[j]&gt;&gt;(i-k1))&amp;km;
-    <span class="keyword">else</span> {
-      w = (e[j]&amp;((<span class="number">1</span>&lt;&lt;(i+<span class="number">1</span>))-<span class="number">1</span>))&lt;&lt;(k1-i);
-      <span class="keyword">if</span>(j &gt; <span class="number">0</span>) w |= e[j-<span class="number">1</span>]&gt;&gt;(<span class="keyword">this</span>.DB+i-k1);
+  <span class="attribute">var</span> <span class="attribute">j</span> = <span class="attribute">e.t-1</span>, <span class="attribute">w</span>, <span class="attribute">is1</span> = <span class="attribute">true</span>, <span class="attribute">r2</span> = <span class="attribute">nbi</span>(), <span class="attribute">t</span>;
+  <span class="attribute">i</span> = <span class="attribute">nbits</span>(<span class="attribute">e</span>[<span class="attribute">j</span>])<span class="attribute">-1</span>;
+  <span class="attribute">while</span>(<span class="attribute">j</span> &gt;</span>= 0) {
+    if(i &gt;= k1) w = (e[j]&gt;&gt;(i-k1))&amp;km;
+    else {
+      w = (e[j]&amp;((1<span class="tag">&lt;<span class="title">&lt;(i+1))-1))&lt;&lt;(k1-i);
+</span>      <span class="attribute">if</span>(<span class="attribute">j</span> &gt;</span> 0) w |= e[j-1]&gt;&gt;(this.DB+i-k1);
     }
 
     n = k;
-    <span class="keyword">while</span>((w&amp;<span class="number">1</span>) == <span class="number">0</span>) { w &gt;&gt;= <span class="number">1</span>; --n; }
-    <span class="keyword">if</span>((i -= n) &lt; <span class="number">0</span>) { i += <span class="keyword">this</span>.DB; --j; }
-    <span class="keyword">if</span>(is1) {	<span class="comment">// ret == 1, don't bother squaring or multiplying it</span>
-      g[w].copyTo(r);
-      is1 = <span class="literal">false</span>;
+    while((w&amp;1) == 0) { w &gt;&gt;= 1; --n; }
+    if((i -= n) <span class="tag">&lt; <span class="attribute">0</span>) { <span class="attribute">i</span> += <span class="attribute">this.DB</span>; <span class="attribute">--j</span>; }
+    <span class="attribute">if</span>(<span class="attribute">is1</span>) {	// <span class="attribute">ret</span> =<span class="value">=</span> <span class="attribute">1</span>, <span class="attribute">don</span>'<span class="attribute">t</span> <span class="attribute">bother</span> <span class="attribute">squaring</span> <span class="attribute">or</span> <span class="attribute">multiplying</span> <span class="attribute">it</span>
+      <span class="attribute">g</span>[<span class="attribute">w</span>]<span class="attribute">.copyTo</span>(<span class="attribute">r</span>);
+      <span class="attribute">is1</span> = <span class="attribute">false</span>;
     }
-    <span class="keyword">else</span> {
-      <span class="keyword">while</span>(n &gt; <span class="number">1</span>) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= <span class="number">2</span>; }
-      <span class="keyword">if</span>(n &gt; <span class="number">0</span>) z.sqrTo(r,r2); <span class="keyword">else</span> { t = r; r = r2; r2 = t; }
+    <span class="attribute">else</span> {
+      <span class="attribute">while</span>(<span class="attribute">n</span> &gt;</span> 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
+      if(n &gt; 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
       z.mulTo(r2,g[w],r);
     }
 
-    <span class="keyword">while</span>(j &gt;= <span class="number">0</span> &amp;&amp; (e[j]&amp;(<span class="number">1</span>&lt;&lt;i)) == <span class="number">0</span>) {
-      z.sqrTo(r,r2); t = r; r = r2; r2 = t;
-      <span class="keyword">if</span>(--i &lt; <span class="number">0</span>) { i = <span class="keyword">this</span>.DB-<span class="number">1</span>; --j; }
+    while(j &gt;= 0 &amp;&amp; (e[j]&amp;(1<span class="tag">&lt;<span class="title">&lt;i))</span> =<span class="value">=</span> <span class="attribute">0</span>) {
+      <span class="attribute">z.sqrTo</span>(<span class="attribute">r</span>,<span class="attribute">r2</span>); <span class="attribute">t</span> = <span class="attribute">r</span>; <span class="attribute">r</span> = <span class="attribute">r2</span>; <span class="attribute">r2</span> = <span class="attribute">t</span>;
+      <span class="attribute">if</span>(<span class="attribute">--i</span> &lt; <span class="attribute">0</span>) { <span class="attribute">i</span> = <span class="attribute">this.DB-1</span>; <span class="attribute">--j</span>; }
     }
   }
-  <span class="keyword">return</span> z.revert(r);
-}</pre></div></div>
+  <span class="attribute">return</span> <span class="attribute">z.revert</span>(<span class="attribute">r</span>);
+}
+
+</span></pre></div></div>
             
         </li>
         
@@ -2442,7 +2498,9 @@ Barrett.prototype.sqrTo = barrettSqrTo;</pre></div></div>
 }
 
 <span class="keyword">var</span> lowprimes = [<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">7</span>,<span class="number">11</span>,<span class="number">13</span>,<span class="number">17</span>,<span class="number">19</span>,<span class="number">23</span>,<span class="number">29</span>,<span class="number">31</span>,<span class="number">37</span>,<span class="number">41</span>,<span class="number">43</span>,<span class="number">47</span>,<span class="number">53</span>,<span class="number">59</span>,<span class="number">61</span>,<span class="number">67</span>,<span class="number">71</span>,<span class="number">73</span>,<span class="number">79</span>,<span class="number">83</span>,<span class="number">89</span>,<span class="number">97</span>,<span class="number">101</span>,<span class="number">103</span>,<span class="number">107</span>,<span class="number">109</span>,<span class="number">113</span>,<span class="number">127</span>,<span class="number">131</span>,<span class="number">137</span>,<span class="number">139</span>,<span class="number">149</span>,<span class="number">151</span>,<span class="number">157</span>,<span class="number">163</span>,<span class="number">167</span>,<span class="number">173</span>,<span class="number">179</span>,<span class="number">181</span>,<span class="number">191</span>,<span class="number">193</span>,<span class="number">197</span>,<span class="number">199</span>,<span class="number">211</span>,<span class="number">223</span>,<span class="number">227</span>,<span class="number">229</span>,<span class="number">233</span>,<span class="number">239</span>,<span class="number">241</span>,<span class="number">251</span>,<span class="number">257</span>,<span class="number">263</span>,<span class="number">269</span>,<span class="number">271</span>,<span class="number">277</span>,<span class="number">281</span>,<span class="number">283</span>,<span class="number">293</span>,<span class="number">307</span>,<span class="number">311</span>,<span class="number">313</span>,<span class="number">317</span>,<span class="number">331</span>,<span class="number">337</span>,<span class="number">347</span>,<span class="number">349</span>,<span class="number">353</span>,<span class="number">359</span>,<span class="number">367</span>,<span class="number">373</span>,<span class="number">379</span>,<span class="number">383</span>,<span class="number">389</span>,<span class="number">397</span>,<span class="number">401</span>,<span class="number">409</span>,<span class="number">419</span>,<span class="number">421</span>,<span class="number">431</span>,<span class="number">433</span>,<span class="number">439</span>,<span class="number">443</span>,<span class="number">449</span>,<span class="number">457</span>,<span class="number">461</span>,<span class="number">463</span>,<span class="number">467</span>,<span class="number">479</span>,<span class="number">487</span>,<span class="number">491</span>,<span class="number">499</span>,<span class="number">503</span>,<span class="number">509</span>,<span class="number">521</span>,<span class="number">523</span>,<span class="number">541</span>,<span class="number">547</span>,<span class="number">557</span>,<span class="number">563</span>,<span class="number">569</span>,<span class="number">571</span>,<span class="number">577</span>,<span class="number">587</span>,<span class="number">593</span>,<span class="number">599</span>,<span class="number">601</span>,<span class="number">607</span>,<span class="number">613</span>,<span class="number">617</span>,<span class="number">619</span>,<span class="number">631</span>,<span class="number">641</span>,<span class="number">643</span>,<span class="number">647</span>,<span class="number">653</span>,<span class="number">659</span>,<span class="number">661</span>,<span class="number">673</span>,<span class="number">677</span>,<span class="number">683</span>,<span class="number">691</span>,<span class="number">701</span>,<span class="number">709</span>,<span class="number">719</span>,<span class="number">727</span>,<span class="number">733</span>,<span class="number">739</span>,<span class="number">743</span>,<span class="number">751</span>,<span class="number">757</span>,<span class="number">761</span>,<span class="number">769</span>,<span class="number">773</span>,<span class="number">787</span>,<span class="number">797</span>,<span class="number">809</span>,<span class="number">811</span>,<span class="number">821</span>,<span class="number">823</span>,<span class="number">827</span>,<span class="number">829</span>,<span class="number">839</span>,<span class="number">853</span>,<span class="number">857</span>,<span class="number">859</span>,<span class="number">863</span>,<span class="number">877</span>,<span class="number">881</span>,<span class="number">883</span>,<span class="number">887</span>,<span class="number">907</span>,<span class="number">911</span>,<span class="number">919</span>,<span class="number">929</span>,<span class="number">937</span>,<span class="number">941</span>,<span class="number">947</span>,<span class="number">953</span>,<span class="number">967</span>,<span class="number">971</span>,<span class="number">977</span>,<span class="number">983</span>,<span class="number">991</span>,<span class="number">997</span>];
-<span class="keyword">var</span> lplim = (<span class="number">1</span>&lt;&lt;<span class="number">26</span>)/lowprimes[lowprimes.length-<span class="number">1</span>];</pre></div></div>
+<span class="keyword">var</span> lplim = (<span class="number">1</span>&lt;<span class="xml"><span class="tag">&lt;<span class="title">26)</span>/<span class="attribute">lowprimes</span>[<span class="attribute">lowprimes.length-1</span>];
+
+</span></pre></div></div>
             
         </li>
         

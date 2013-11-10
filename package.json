@@ -15,7 +15,8 @@
     "async": "latest",
     "bitcoin": "latest",
     "buffertools": "latest",
-	"colors": "latest"
+	"colors": "latest",
+    "jayson": "latest"
   },
   "devDependencies": {
 	"docco": "latest"

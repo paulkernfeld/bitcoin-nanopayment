@@ -39,6 +39,16 @@
               </a>
             
               
+              <a class="source" href="rpc-client.html">
+                rpc-client.js
+              </a>
+            
+              
+              <a class="source" href="rpc-server.html">
+                rpc-server.js
+              </a>
+            
+              
               <a class="source" href="script.html">
                 script.js
               </a>
@@ -49,8 +59,23 @@
               </a>
             
               
+              <a class="source" href="test-jayson.html">
+                test-jayson.js
+              </a>
+            
+              
               <a class="source" href="test-jsbn.html">
                 test-jsbn.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-lib.html">
+                test-payment-lib.js
+              </a>
+            
+              
+              <a class="source" href="test-payment-rpc.html">
+                test-payment-rpc.js
               </a>
             
               
@@ -247,7 +272,7 @@ exports.decode = <span class="function"><span class="keyword">function</span> <s
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.encodeChecked = <span class="function"><span class="keyword">function</span><span class="params">(input, version)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.encodeChecked = <span class="keyword">function</span>(input, version) {</pre></div></div>
             
         </li>
         
@@ -278,7 +303,7 @@ Return (hex, version byte)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.decodeChecked = <span class="function"><span class="keyword">function</span><span class="params">(input)</span> {</span>
+            <div class="content"><div class='highlight'><pre>exports.decodeChecked = <span class="keyword">function</span>(input) {
   <span class="keyword">var</span> buffer = <span class="keyword">new</span> Buffer(exports.decode(input));
   assert(
     buffer.length &gt; <span class="number">5</span>,
