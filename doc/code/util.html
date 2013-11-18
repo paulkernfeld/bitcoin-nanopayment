@@ -151,7 +151,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="function"><span class="keyword">function</span><span class="params">(n)</span> {</span>
+            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="keyword">function</span>(n) {
   assert(n &gt; <span class="number">0</span>);</pre></div></div>
             
         </li>
@@ -207,7 +207,7 @@ We need:   8 ^ nBytes &gt;= n</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="function"><span class="keyword">function</span><span class="params">(n)</span> {</span>
+            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="keyword">function</span>(n) {
    <span class="keyword">return</span> <span class="keyword">typeof</span> n === <span class="string">'number'</span> &amp;&amp; n % <span class="number">1</span> == <span class="number">0</span>;
 };</pre></div></div>
             
@@ -225,7 +225,7 @@ We need:   8 ^ nBytes &gt;= n</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="function"><span class="keyword">function</span><span class="params">(a)</span> {</span>
+            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="keyword">function</span>(a) {
   <span class="keyword">return</span> <span class="keyword">typeof</span> a === <span class="string">'string'</span>;
 };</pre></div></div>
             
@@ -243,7 +243,7 @@ We need:   8 ^ nBytes &gt;= n</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="function"><span class="keyword">function</span><span class="params">(pk)</span> {</span>
+            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="keyword">function</span>(pk) {
   <span class="keyword">return</span> <span class="keyword">typeof</span> pk === <span class="string">'string'</span>;
 };</pre></div></div>
             

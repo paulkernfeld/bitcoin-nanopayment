@@ -8,6 +8,7 @@ cd $gitroot;
 
 # Run docco
 echo "Running docco...";
+rm -rf doc/code;
 docco lib/*.js --output=doc/code;
 git add doc/code;
 

@@ -231,7 +231,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> serializeTarget = exports.serializeTarget =
-  <span class="function"><span class="keyword">function</span><span class="params">(amount, length, vout, start)</span> {</span>
+  <span class="keyword">function</span>(amount, length, vout, start) {
     <span class="keyword">return</span> amount + <span class="string">'-'</span> + length + <span class="string">'-'</span> + vout + <span class="string">'-'</span> + start;
   };</pre></div></div>
             
@@ -248,7 +248,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="function"><span class="keyword">function</span><span class="params">(target)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> deserializeTarget = exports.deserializeTarget = <span class="keyword">function</span>(target) {
   assert(<span class="keyword">typeof</span> target === <span class="string">'string'</span>, <span class="string">'target must be a string'</span>);
 
   <span class="keyword">var</span> split = target.split(<span class="string">'-'</span>);
@@ -264,7 +264,7 @@ TXID_RANGE_BI.fromString(<span class="string">'100000000000000000000000000000000
   };
 };
 
-exports.Client = <span class="function"><span class="keyword">function</span><span class="params">(clientConfig)</span> {</span>
+exports.Client = <span class="keyword">function</span>(clientConfig) {
 
   <span class="keyword">var</span> rpcConfig = clientConfig.rpc;
   assert(rpcConfig, <span class="string">'The rpcConfig must exist'</span>);</pre></div></div>
@@ -283,7 +283,7 @@ Currently, it uses only one Bitcoin address.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.Account = <span class="function"><span class="keyword">function</span><span class="params">(address, privateKey)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.Account = <span class="keyword">function</span>(address, privateKey) {</pre></div></div>
             
         </li>
         
@@ -411,7 +411,7 @@ of previous transactions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPrevious = <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPrevious = <span class="keyword">function</span>(cb) {
       <span class="keyword">var</span> balance = <span class="literal">null</span>;
       <span class="keyword">var</span> previousTxid;
       <span class="keyword">var</span> previousVout;</pre></div></div>
@@ -434,7 +434,7 @@ of previous transactions.</p>
         minConf,
         <span class="number">999999</span>,
         [address],
-        <span class="function"><span class="keyword">function</span><span class="params">(err, transactions)</span> {</span>
+        <span class="keyword">function</span>(err, transactions) {
           <span class="keyword">if</span>(err) {
             cb(err);
             <span class="keyword">return</span>;
@@ -509,7 +509,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(inverseProbability, fromAddress, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="keyword">function</span>(inverseProbability, fromAddress, cb) {
 
       assert(
         util.isInt(inverseProbability),
@@ -531,7 +531,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> requestVoucher = <span class="keyword">function</span>(queueCb) {
 
         async.waterfall([</pre></div></div>
             
@@ -563,7 +563,7 @@ we can continue processing other operations.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -628,7 +628,7 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, waterfallCb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(transactionHex, waterfallCb) {
             client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, waterfallCb);
           },</pre></div></div>
             
@@ -645,7 +645,7 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -669,7 +669,7 @@ submitting this to the Bitcoin network yet.</p>
             client.cmd(
               <span class="string">'decoderawtransaction'</span>,
               signed.hex,
-              <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
+              <span class="keyword">function</span>(err, transactionJson) {
                 waterfallCb(err, signed, transactionJson);
               }
             );
@@ -688,7 +688,7 @@ submitting this to the Bitcoin network yet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, transactionJson, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, transactionJson, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -809,7 +809,7 @@ so it&#39;s fine.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      queue.push(requestVoucher, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>});
+            <div class="content"><div class='highlight'><pre>      queue.push(requestVoucher, <span class="keyword">function</span>() {});
     };</pre></div></div>
             
         </li>
@@ -831,7 +831,7 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(destinationAddress, targetSerialized, cb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="keyword">function</span>(destinationAddress, targetSerialized, cb) {</pre></div></div>
             
         </li>
         
@@ -919,7 +919,7 @@ On success, we call cb(null, transactionHex)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(queueCb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> createVoucher = <span class="keyword">function</span>(queueCb) {
 
         async.waterfall([</pre></div></div>
             
@@ -952,7 +952,7 @@ creates a binary string representing the transaction.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(previous, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(previous, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -1044,7 +1044,7 @@ destination address</p>
               previousTxidGuess = <span class="string">'0'</span> + previousTxidGuess;
             }
 
-            <span class="keyword">var</span> waterfallTranslator = <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
+            <span class="keyword">var</span> waterfallTranslator = <span class="keyword">function</span>(err, transactionHex) {
               waterfallCb(err, transactionHex, previousTxidGuess);
             }
 
@@ -1064,7 +1064,7 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, previousTxidGuess, waterfallCb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(transactionHex, previousTxidGuess, waterfallCb) {
             <span class="keyword">var</span> scriptPubKey = script.addressToScript(addressHex);
 
             client.cmd(<span class="string">'signrawtransaction'</span>, transactionHex, [{<span class="string">'txid'</span>: previousTxidGuess,<span class="string">'vout'</span>: target.vout, <span class="string">'scriptPubKey'</span>: scriptPubKey, <span class="string">'redeemScript'</span>: privateKey}], waterfallCb);
@@ -1083,7 +1083,7 @@ destination address</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="function"><span class="keyword">function</span><span class="params">(signed, waterfallCb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">function</span>(signed, waterfallCb) {</pre></div></div>
             
         </li>
         
@@ -1145,7 +1145,7 @@ If the voucher is valid, call cb(null, cashed)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="keyword">function</span>(transactionHex, cb) {</pre></div></div>
             
         </li>
         
@@ -1160,7 +1160,7 @@ If the voucher is valid, call cb(null, cashed)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, transactionJson)</span> {</span>
+            <div class="content"><div class='highlight'><pre>      client.cmd(<span class="string">'decoderawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, transactionJson) {
 
         <span class="keyword">if</span>(err) {
           cb(<span class="string">'Error decoding transaction: '</span> + err);
@@ -1347,7 +1347,7 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+            <div class="content"><div class='highlight'><pre>        client.cmd(<span class="string">'sendrawtransaction'</span>, currentTarget.transactionHex, <span class="keyword">function</span>(err, txid) {
           <span class="keyword">if</span>(err) {</pre></div></div>
             
         </li>
@@ -1395,7 +1395,7 @@ correctness</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, txid)</span> {</span>
+            <div class="content"><div class='highlight'><pre>          client.cmd(<span class="string">'sendrawtransaction'</span>, transactionHex, <span class="keyword">function</span>(err, txid) {
             <span class="keyword">if</span>(err) {
               cb(<span class="string">'Error sending real transaction: '</span> + err);
             } <span class="keyword">else</span> {

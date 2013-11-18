@@ -167,7 +167,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> simpleParse = <span class="function"><span class="keyword">function</span><span class="params">(template, split)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> simpleParse = <span class="keyword">function</span>(template, split) {</pre></div></div>
             
         </li>
         
@@ -230,7 +230,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> useAccount = <span class="function"><span class="keyword">function</span><span class="params">(split, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> useAccount = <span class="keyword">function</span>(split, cb) {
   <span class="keyword">var</span> template = [
     <span class="string">'use'</span>, <span class="string">'This command uses a given address to make and receive payments'</span>,
     <span class="string">'address'</span>, <span class="string">'The address (public key) for your address'</span>,
@@ -272,7 +272,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> requestVoucher = <span class="function"><span class="keyword">function</span><span class="params">(split, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> requestVoucher = <span class="keyword">function</span>(split, cb) {
   <span class="keyword">var</span> template = [
     <span class="string">'request'</span>,
     <span class="string">'This generates a payment request to send to another party'</span>,
@@ -303,7 +303,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> createVoucher = <span class="function"><span class="keyword">function</span><span class="params">(split, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> createVoucher = <span class="keyword">function</span>(split, cb) {
   <span class="keyword">var</span> template = [
     <span class="string">'create'</span>, <span class="string">'This creates a payment from this address to someone else'</span>,
     <span class="string">'destinationAddress'</span>, <span class="string">'The address to pay the money to'</span>,
@@ -329,7 +329,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> cashVoucher = <span class="function"><span class="keyword">function</span><span class="params">(split, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> cashVoucher = <span class="keyword">function</span>(split, cb) {
   <span class="keyword">var</span> template = [
     <span class="string">'cash'</span>, <span class="string">'This command attempts to cash in a voucher from another party'</span>,
     <span class="string">'transactionHex'</span>, <span class="string">'The hex-encoded transaction'</span>
@@ -354,7 +354,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> replEval = <span class="function"><span class="keyword">function</span><span class="params">(cmd, context, filename, cb)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> replEval = <span class="keyword">function</span>(cmd, context, filename, cb) {</pre></div></div>
             
         </li>
         

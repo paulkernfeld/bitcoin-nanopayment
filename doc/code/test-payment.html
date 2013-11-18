@@ -217,11 +217,11 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(cb) {
       destinationAccount.requestVoucher(
         <span class="number">1</span>,
         accountConfig.sourceAddress,
-        <span class="function"><span class="keyword">function</span><span class="params">(err, targetSerialized)</span> {</span>
+        <span class="keyword">function</span>(err, targetSerialized) {
           assert(!err, util.inspect(err));
           console.log(<span class="string">'Voucher requested.'</span>);
 
@@ -258,11 +258,11 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(range, cb)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(range, cb) {
       sourceAccount.createVoucher(
         destinationAddress,
         range,
-        <span class="function"><span class="keyword">function</span><span class="params">(err, transactionHex)</span> {</span>
+        <span class="keyword">function</span>(err, transactionHex) {
           assert(!err, util.inspect(err));
           console.log(<span class="string">'Voucher created.'</span>);
           cb(err, transactionHex);
@@ -283,8 +283,8 @@ from one to the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span><span class="params">(transactionHex, cb)</span> {</span>
-      destinationAccount.cashVoucher(transactionHex, <span class="function"><span class="keyword">function</span><span class="params">(err, cashed)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">function</span>(transactionHex, cb) {
+      destinationAccount.cashVoucher(transactionHex, <span class="keyword">function</span>(err, cashed) {
         assert(!err, util.inspect(err));
         assert(cashed, <span class="string">"The voucher wasn't cashable?"</span>);
         console.log(<span class="string">'Transaction cashed.'</span>);
