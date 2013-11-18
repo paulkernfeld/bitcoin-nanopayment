@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>script.js</title>
+  <title>rpc-server.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -101,7 +101,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>script.js</h1>
+                  <h1>rpc-server.js</h1>
               </div>
           </li>
         
@@ -139,11 +139,12 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Internal import</p>
+              <p>Internal imports</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> base58 = require(<span class="string">'./base58'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> nanopayments = require(<span class="string">'../lib/bitcoin-nanopayment'</span>);
+<span class="keyword">var</span> Client = nanopayments.Client;</pre></div></div>
             
         </li>
         
@@ -154,20 +155,118 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>This is just a stub file for generating standard pay-to-public-key-hash
-transactions</p>
-<p>Standard tx: <a href="https://en.bitcoin.it/wiki/Transactions#Pay-to-PubkeyHash">https://en.bitcoin.it/wiki/Transactions#Pay-to-PubkeyHash</a>
-Bitcoin Script: <a href="https://en.bitcoin.it/wiki/Script">https://en.bitcoin.it/wiki/Script</a></p>
+              <p>External imports</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.addressToScript = <span class="keyword">function</span>(addressHex) {
-  <span class="keyword">var</span> scriptStart = <span class="string">'76a914'</span>;
-  <span class="keyword">var</span> scriptEnd = <span class="string">'88ac'</span>;
-  <span class="keyword">return</span> scriptStart + addressHex + scriptEnd;
-};
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jayson = require(<span class="string">'jayson'</span>);
+<span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>This server accepts incoming JSON-RPC connections over HTTP. This lets
+code in other languages use this library. See <code>rpc-client.js</code> for an example
+of what an RPC client library might look like.</p>
+<p>The clientconfig object must have the following fields:</p>
+<p>{
+  rpc: {
+    port: integer
+  }
+}</p>
 
-Object.freeze(exports);</pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.Server = <span class="keyword">function</span>(clientConfig) {
+
+  <span class="keyword">var</span> serverRunning;
+  <span class="keyword">var</span> accounts = {};
+
+  <span class="keyword">var</span> client = <span class="keyword">new</span> Client(clientConfig);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>create a server</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> server = jayson.server({
+
+    createAccount: <span class="keyword">function</span>(address, privateKey, cb) {
+      client.getAccount(address, privateKey, <span class="keyword">function</span>(err, account) {
+        <span class="keyword">if</span> (err) {
+          cb(err);
+        }
+        accounts[address] = account;
+        cb(<span class="literal">null</span>, address);
+      });
+    },
+
+    requestVoucher: <span class="keyword">function</span>(accountAddress, inverseProbability, fromAddress, cb) {
+      accounts[accountAddress].requestVoucher(inverseProbability, fromAddress, cb);
+    },
+
+    createVoucher: <span class="keyword">function</span>(accountAddress, destinationAddress, targetSerialized, cb) {
+      accounts[accountAddress].createVoucher(destinationAddress, targetSerialized, cb);
+    },
+
+    cashVoucher: <span class="keyword">function</span>(accountAddress, transactionHex, cb) {
+      accounts[accountAddress].cashVoucher(transactionHex, cb);
+    }
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Bind a http interface to the server and let it listen
+Only allow connections from localhost
+cb takes only the error</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.listen = <span class="keyword">function</span>(cb) {
+    serverRunning = server.http();
+    serverRunning.on(<span class="string">'listening'</span>, <span class="keyword">function</span>() { cb(<span class="literal">null</span>); });
+    serverRunning.on(<span class="string">'error'</span>, <span class="keyword">function</span>(err, b) { cb(err); });
+    serverRunning.listen(clientConfig.rpc.port, <span class="string">'localhost'</span>);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Call this when you&#39;re done to release resources</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.close = <span class="keyword">function</span>() {
+    serverRunning.close();
+  }
+};</pre></div></div>
             
         </li>
         

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>script.js</title>
+  <title>test-jayson.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -101,7 +101,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>script.js</h1>
+                  <h1>test-jayson.js</h1>
               </div>
           </li>
         
@@ -113,22 +113,10 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>Copyright 2013 Paul Kernfeld</p>
-<p>This file is part of bitcoin-nanopayment.</p>
-<p> bitcoin-nanopayment is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.</p>
-<p> bitcoin-nanopayment is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.</p>
-<p> You should have received a copy of the GNU General Public License
- along with bitcoin-nanopayment.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="string">'use strict'</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jayson = require(<span class="string">'jayson'</span>);</pre></div></div>
             
         </li>
         
@@ -139,11 +127,15 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Internal import</p>
+              <p>create a server</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> base58 = require(<span class="string">'./base58'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> server = jayson.server({
+  add: <span class="keyword">function</span>(a, b, callback) {
+    callback(<span class="literal">null</span>, a + b);
+  }
+});</pre></div></div>
             
         </li>
         
@@ -154,20 +146,48 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>This is just a stub file for generating standard pay-to-public-key-hash
-transactions</p>
-<p>Standard tx: <a href="https://en.bitcoin.it/wiki/Transactions#Pay-to-PubkeyHash">https://en.bitcoin.it/wiki/Transactions#Pay-to-PubkeyHash</a>
-Bitcoin Script: <a href="https://en.bitcoin.it/wiki/Script">https://en.bitcoin.it/wiki/Script</a></p>
+              <p>Bind a http interface to the server and let it listen to localhost:3000</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.addressToScript = <span class="keyword">function</span>(addressHex) {
-  <span class="keyword">var</span> scriptStart = <span class="string">'76a914'</span>;
-  <span class="keyword">var</span> scriptEnd = <span class="string">'88ac'</span>;
-  <span class="keyword">return</span> scriptStart + addressHex + scriptEnd;
-};
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> serverRunning = server.http().listen(<span class="number">3000</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>create a client</p>
 
-Object.freeze(exports);</pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> client = jayson.client.http({
+  port: <span class="number">3000</span>,
+  hostname: <span class="string">'localhost'</span>
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>invoke &quot;add&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>client.request(<span class="string">'add'</span>, [<span class="number">1</span>, <span class="number">1</span>], <span class="keyword">function</span>(err, error, response) {
+  <span class="keyword">if</span>(err) <span class="keyword">throw</span> err;
+  console.log(response); <span class="comment">// 2!</span>
+  serverRunning.close();
+});</pre></div></div>
             
         </li>
         

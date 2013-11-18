@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>util.js</title>
+  <title>rpc-client.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -101,7 +101,7 @@
         
           <li id="title">
               <div class="annotation">
-                  <h1>util.js</h1>
+                  <h1>rpc-client.js</h1>
               </div>
           </li>
         
@@ -140,10 +140,11 @@
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
               <p>Internal imports</p>
+<p>External imports</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> BigInteger = require(<span class="string">'./jsbn-patched'</span>).BigInteger;</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jayson = require(<span class="string">'jayson'</span>);</pre></div></div>
             
         </li>
         
@@ -154,12 +155,30 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>External imports</p>
+              <p>This creates a client object that accesses a bitcoin-nanopayment server (see
+rpc-server.js) over RPC. In order for this to work, the RPC server must be
+running. There&#39;s probably no reason you&#39;d need this in node; it&#39;s just an
+example implementation of the bitcoin-nanopayment RPC client. clientConfig
+should look like:</p>
+<p>{
+  timeout: integer (optional, milliseconds),
+  minConf: integer (optional),
+  rpc: {
+    host: string,
+    port: integer
+  }
+}</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);
-<span class="keyword">var</span> crypto = require(<span class="string">'crypto'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.Client = <span class="keyword">function</span>(clientConfig) {
+  <span class="keyword">var</span> client = jayson.client.http({
+    hostname: clientConfig.rpc.host,
+    port: clientConfig.rpc.port
+  });
+
+  <span class="keyword">var</span> Account = <span class="keyword">function</span>(address, privateKey) {
+    <span class="keyword">this</span>.address = address;</pre></div></div>
             
         </li>
         
@@ -170,14 +189,23 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>This file is just miscellaneous helper functions</p>
-<p>Generates a random number between 0 and n - 1, inclusive.</p>
-<p>TODO: use all the bits, keep leftover unused bits</p>
+              <p>This method has the same contract as the one in &#39;bitcoin-nanopayment.js&#39;</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.cryptoRandom = exports.cryptoRandom = <span class="keyword">function</span>(n) {
-  assert(n &gt; <span class="number">0</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.requestVoucher = <span class="keyword">function</span>(inverseProbability, fromAddress, cb) {
+      client.request(<span class="string">'requestVoucher'</span>, [address, inverseProbability, fromAddress], <span class="keyword">function</span>(err, error, response) {
+        <span class="keyword">if</span>(err) {
+          cb(err);
+          <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span>(error) {
+          cb(error);
+          <span class="keyword">return</span>;
+        }
+        cb(error, response);
+      });
+    };</pre></div></div>
             
         </li>
         
@@ -188,14 +216,23 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>How many random bytes do we need?
-We need:   8 ^ nBytes &gt;= n</p>
+              <p>This method has the same contract as the one in &#39;bitcoin-nanopayment.js&#39;</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">for</span>(<span class="keyword">var</span> nBytes = <span class="number">0</span>; Math.pow(<span class="number">8</span>, nBytes) &lt; n; nBytes++);
-
-  <span class="keyword">var</span> random;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.createVoucher = <span class="keyword">function</span>(destinationAddress, targetSerialized, cb) {
+      client.request(<span class="string">'createVoucher'</span>, [address, destinationAddress, targetSerialized], <span class="keyword">function</span>(err, error, response) {
+        <span class="keyword">if</span>(err) {
+          cb(err);
+          <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span>(error) {
+          cb(error);
+          <span class="keyword">return</span>;
+        }
+        cb(error, response);
+      });
+    };</pre></div></div>
             
         </li>
         
@@ -206,18 +243,24 @@ We need:   8 ^ nBytes &gt;= n</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Use rejection sampling</p>
+              <p>This method has the same contract as the one in &#39;bitcoin-nanopayment.js&#39;</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">do</span> {
-    <span class="keyword">var</span> randomBi = <span class="keyword">new</span> BigInteger();
-    randomBi.fromString(crypto.randomBytes(nBytes).toString(<span class="string">'hex'</span>), <span class="number">16</span>);
-    random = parseInt(randomBi.toString(<span class="number">10</span>))
-  } <span class="keyword">while</span> (random &gt;= n);
-
-  <span class="keyword">return</span> random;
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cashVoucher = <span class="keyword">function</span>(transactionHex, cb) {
+      client.request(<span class="string">'cashVoucher'</span>, [address, transactionHex], <span class="keyword">function</span>(err, error, response) {
+        <span class="keyword">if</span>(err) {
+          cb(err);
+          <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span>(error) {
+          cb(error);
+          <span class="keyword">return</span>;
+        }
+        cb(error, response);
+      });
+    };
+  };</pre></div></div>
             
         </li>
         
@@ -228,13 +271,11 @@ We need:   8 ^ nBytes &gt;= n</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>/Verify that this variable is an integer</p>
+              <p>This method has the same contract as the one in &#39;bitcoin-nanopayment.js&#39;</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isInt = <span class="keyword">function</span>(n) {
-   <span class="keyword">return</span> <span class="keyword">typeof</span> n === <span class="string">'number'</span> &amp;&amp; n % <span class="number">1</span> == <span class="number">0</span>;
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.getAccount = <span class="keyword">function</span>(address, privateKey, cb) {</pre></div></div>
             
         </li>
         
@@ -245,31 +286,24 @@ We need:   8 ^ nBytes &gt;= n</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Verify that this variable is a Bitcoin address</p>
-<p>TODO: Make this more specific</p>
+              <p>Wait for a client to be created on the server create a client</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isAddress = <span class="keyword">function</span>(a) {
-  <span class="keyword">return</span> <span class="keyword">typeof</span> a === <span class="string">'string'</span>;
-};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>Verify that this variable is a Bitcoin private key</p>
-<p>TODO: Make this more specific</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.isPrivateKey = <span class="keyword">function</span>(pk) {
-  <span class="keyword">return</span> <span class="keyword">typeof</span> pk === <span class="string">'string'</span>;
+            <div class="content"><div class='highlight'><pre>    client.request(<span class="string">'createAccount'</span>, [address, privateKey], <span class="keyword">function</span>(err, error, response) {
+      <span class="keyword">if</span>(err) {
+        cb(err);
+        <span class="keyword">return</span>;
+      }
+      <span class="keyword">if</span>(error) {
+        cb(error);
+        <span class="keyword">return</span>;
+      }
+      
+      <span class="keyword">var</span> account = <span class="keyword">new</span> Account(address, privateKey);
+      cb(<span class="literal">null</span>, account);
+    });
+  };
 };</pre></div></div>
             
         </li>
