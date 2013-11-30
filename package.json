@@ -1,6 +1,6 @@
 {
   "name": "bitcoin-nanopayment",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Send probabilistic Bitcoin nanopayments",
   "keywords": ["bitcoin", "btc", "micropayment", "nanopayment"],
   "author": {
@@ -10,7 +10,7 @@
   },
   "files": ["lib"],
   "main": "lib/bitcoin-nanopayment",
-  "repository": { "type": "git", "url": "http://github.com/hi-entropy/bitcoin-nanopayments.git" },
+  "repository": { "type": "git", "url": "http://github.com/lo-entropy/bitcoin-nanopayments.git" },
   "dependencies": {
     "async": "latest",
     "bitcoin": "latest",
