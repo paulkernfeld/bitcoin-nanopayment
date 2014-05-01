@@ -160,7 +160,9 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jayson = require(<span class="string">'jayson'</span>);
-<span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);</pre></div></div>
+<span class="keyword">var</span> assert = require(<span class="string">'assert'</span>);
+<span class="keyword">var</span> fs = require(<span class="string">'fs'</span>);
+<span class="keyword">var</span> util = require(<span class="string">'util'</span>);</pre></div></div>
             
         </li>
         
@@ -206,9 +208,11 @@ of what an RPC client library might look like.</p>
             <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> server = jayson.server({
 
     createAccount: <span class="keyword">function</span>(address, privateKey, cb) {
+      console.log(<span class="string">'Creating account'</span>, address, privateKey);
       client.getAccount(address, privateKey, <span class="keyword">function</span>(err, account) {
         <span class="keyword">if</span> (err) {
           cb(err);
+          <span class="keyword">return</span>;
         }
         accounts[address] = account;
         cb(<span class="literal">null</span>, address);
@@ -216,14 +220,20 @@ of what an RPC client library might look like.</p>
     },
 
     requestVoucher: <span class="keyword">function</span>(accountAddress, inverseProbability, fromAddress, cb) {
+      console.log(<span class="string">'Requesting voucher'</span>, accountAddress, inverseProbability, fromAddress);
       accounts[accountAddress].requestVoucher(inverseProbability, fromAddress, cb);
     },
 
     createVoucher: <span class="keyword">function</span>(accountAddress, destinationAddress, targetSerialized, cb) {
-      accounts[accountAddress].createVoucher(destinationAddress, targetSerialized, cb);
+      console.log(<span class="string">'Creating voucher'</span>, accountAddress, destinationAddress, targetSerialized);
+      accounts[accountAddress].createVoucher(destinationAddress, targetSerialized, <span class="keyword">function</span>(err, transactionHex) {
+        console.log(<span class="string">'Created voucher'</span>, transactionHex);
+        cb(err, transactionHex);
+      });
     },
 
     cashVoucher: <span class="keyword">function</span>(accountAddress, transactionHex, cb) {
+      console.log(<span class="string">'Cashing voucher'</span>, accountAddress, transactionHex);
       accounts[accountAddress].cashVoucher(transactionHex, cb);
     }
   });</pre></div></div>
@@ -267,6 +277,41 @@ cb takes only the error</p>
     serverRunning.close();
   }
 };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>If called from the command line, load the config file specified as the
+first command line argument.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> (require.main === module) {
+  <span class="keyword">var</span> config = JSON.parse(fs.readFileSync(process.argv[<span class="number">2</span>], <span class="string">'utf8'</span>));
+
+  console.log(config);
+
+  <span class="keyword">var</span> server = <span class="keyword">new</span> exports.Server(config);
+  console.log(<span class="string">'Starting RPC server...'</span>);
+  server.listen(
+    <span class="keyword">function</span>(err) {
+      assert(!err, util.inspect(err));
+      console.log(<span class="string">'RPC server started.'</span>);
+    }
+  );
+
+  process.on(<span class="string">'SIGINT'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    console.log(<span class="string">'Stopping RPC server...'</span>);
+    server.close();
+    console.log(<span class="string">'RPC server stopped.'</span>);
+  });
+}</pre></div></div>
             
         </li>
         
